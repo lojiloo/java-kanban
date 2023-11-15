@@ -11,13 +11,6 @@ public class Task {
         this.description = description;
     }
 
-    public void updateStatus() {
-        if (status.equals("NEW")) {
-            status = "IN_PROGRESS";
-        } else if (status.equals("IN_PROGRESS")) {
-            status = "DONE";
-        }
-    }
 
     @Override
     public String toString() {
@@ -32,6 +25,11 @@ public class Task {
         if (obj == null || this.getClass() != obj.getClass()) return false;
 
         Task otherTask = (Task) obj;
-        return Objects.equals(name, otherTask.name);
+        return name.equals(otherTask.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }
