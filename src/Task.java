@@ -1,7 +1,7 @@
 import java.util.Objects;
 public class Task {
     protected String name;
-    protected String status;
+    public String status;
     protected String description;
     protected int id;
 
@@ -15,6 +15,7 @@ public class Task {
     @Override
     public String toString() {
         return "Название: " + name
+                + ". ID: " + id
                 + ". Описание: " + description
                 + ". Статус: " + status;
     }

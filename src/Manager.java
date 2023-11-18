@@ -7,62 +7,59 @@ public class Manager {
     HashMap<Integer, Subtask> subtasks = new HashMap<>();
 
     public void addNewTask(Task task) {
-        int taskId = getId();
-        task.id = taskId;
-        tasks.put(taskId, task);
+        int id = getId();
+        task.id = id;
+        tasks.put(id, task);
     }
 
     public void addNewEpic(Epic epic) {
-        int epicId = getId();
-        epic.id = epicId;
-        epics.put(epicId, epic);
+        int id = getId();
+        epic.id = id;
+        epics.put(id, epic);
     }
 
     public void addNewSubtask(Subtask subtask) {
-        int subId = getId();
-        subtask.id = subId;
-        subtasks.put(subId, subtask);
+        int id = getId();
+        subtask.id = id;
+        subtasks.put(id, subtask);
+
+        epics.get(subtask.epicId).subtasks.add(subtask);
+        epics.get(subtask.epicId).checkStatus();
     }
 
     private int getId() {
         return ++id;
     }
 
-    public ArrayList<String> getListOfTasks() {
-        ArrayList<String> listOfTasks = new ArrayList<>();
+    public ArrayList<Task> getListOfTasks() {
+        ArrayList<Task> listOfTasks = new ArrayList<>();
         if (!tasks.isEmpty()) {
-            for (Integer tId : tasks.keySet()) {
-                String tInfo = "ID задачи: " + tId + ". " + tasks.get(tId).toString();
-                listOfTasks.add(tInfo);
+            for (Integer id : tasks.keySet()) {
+                Task task = tasks.get(id);
+                listOfTasks.add(task);
             }
-        } else {
-            listOfTasks.add("Задач нет");
         }
         return listOfTasks;
     }
 
-    public ArrayList<String> getListOfEpics() {
-        ArrayList<String> listOfEpics = new ArrayList<>();
+    public ArrayList<Epic> getListOfEpics() {
+        ArrayList<Epic> listOfEpics = new ArrayList<>();
         if (!epics.isEmpty()) {
-            for (Integer eId : epics.keySet()) {
-                String tInfo = "ID эпика: " + eId + ". " + epics.get(eId).toString();
-                listOfEpics.add(tInfo);
+            for (Integer id : epics.keySet()) {
+                Epic epic = epics.get(id);
+                listOfEpics.add(epic);
             }
-        } else {
-            listOfEpics.add("Эпиков нет");
         }
         return listOfEpics;
     }
 
-    public ArrayList<String> getListOfSubtasks() {
-        ArrayList<String> listOfSubtasks = new ArrayList<>();
+    public ArrayList<Subtask> getListOfSubtasks() {
+        ArrayList<Subtask> listOfSubtasks = new ArrayList<>();
         if (!subtasks.isEmpty()) {
-            for (Integer sId : subtasks.keySet()) {
-                String sInfo = "ID сабтаска: " + sId + ". " + subtasks.get(sId).toString();
-                listOfSubtasks.add(sInfo);
+            for (Integer id : subtasks.keySet()) {
+                Subtask subtask = subtasks.get(id);
+                listOfSubtasks.add(subtask);
             }
-        } else {
-            listOfSubtasks.add("Сабтасков нет");
         }
         return listOfSubtasks;
     }
@@ -79,6 +76,7 @@ public class Manager {
     public void clearListOfSubtasks() {
         for (Epic epic : epics.values()) {
             epic.subtasks.clear();
+            epic.checkStatus();
         }
         subtasks.clear();
     }
@@ -95,23 +93,22 @@ public class Manager {
             return subtasks.get(id);
     }
 
-    public void updateTask(Task task, int id, String status) {
-        task.status = status; //не понимаю, что значит "статус задачи обновляется вместе с полным обновлением задачи".
-        // Решила, что это про то, что в параметрах передаётся новый статус, который присваивается переданному объекту
-        tasks.put(id, task);
+    public void updateTask(Task task) {
+        tasks.put(task.id, task);
     }
 
-    //а разве по условию статус эпика обновляется вручную? Я так поняла, что он вычисляется; пользователь его поменять не может
+    public void updateEpic(Epic epic) {
+        epics.put(epic.id, epic);
+    }
 
-    public void updateSubtask(Subtask subtask, int id, String status) {
-        Subtask sub = subtasks.get(id);
+    public void updateSubtask(Subtask subtask) {
+        Subtask sub = subtasks.get(subtask.id);
+
         epics.get(sub.epicId).subtasks.remove(sub);
+        epics.get(sub.epicId).subtasks.add(subtask);
+        epics.get(subtask.epicId).checkStatus();
 
-        subtask.id = id;
-        subtask.status = status;
-        subtasks.put(id, subtask);
-
-        epics.get(sub.epicId).checkStatus();
+        subtasks.put(subtask.id, subtask);
     }
 
     public void clearTasksById(int id) {
@@ -140,6 +137,7 @@ public class Manager {
                 .remove(subtasks.get(id));
 
         subtasks.remove(id);
+        epics.get(epicId).checkStatus();
     }
 
     public ArrayList<Subtask> getSubtasksByEpic(Epic epic) {
