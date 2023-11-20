@@ -1,7 +1,7 @@
 import java.util.Objects;
 public class Task {
     protected String name;
-    public String status;
+    protected String status;
     protected String description;
     protected int id;
 
@@ -11,6 +11,13 @@ public class Task {
         this.description = description;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     @Override
     public String toString() {

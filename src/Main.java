@@ -22,8 +22,8 @@ public class Main {
         Subtask secondSubtask = new Subtask("Заварить чаю", "И выдохнуть", 1);
         secondSubtask.status = "IN_PROGRESS";
         manager.addNewSubtask(secondSubtask);
-        System.out.println(manager.getListOfEpics());
-        System.out.println(manager.getListOfSubtasks());
+        System.out.println(manager.getSubtasksByEpic(epic));
+
         manager.clearSubtasksById(3);
         System.out.println(manager.getListOfEpics());
 
