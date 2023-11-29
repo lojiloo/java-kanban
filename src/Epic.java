@@ -18,26 +18,25 @@ public class Epic extends Task {
 
             for (Subtask subtask : subtasks) {
                 switch (subtask.status) {
-                    case "NEW" :
+                    case NEW:
                         ++counterNew;
                         break;
-                    case "DONE" :
+                    case DONE:
                         ++counterDone;
                         break;
                 }
 
                 if (counterDone == subtasks.size()) {
-                    this.status = "DONE";
+                    this.status = Status.DONE;
                 } else if (counterNew == subtasks.size()) {
-                    this.status = "NEW";
+                    this.status = Status.NEW;
                 } else {
-                    this.status = "IN_PROGRESS";
+                    this.status = Status.IN_PROGRESS;
                 }
             }
 
         } else {
-            this.status = "NEW";
+            this.status = Status.NEW;
         }
     }
-
 }

@@ -1,13 +1,13 @@
 import java.util.Objects;
 public class Task {
     protected String name;
-    protected String status;
+    protected Status status;
     protected String description;
     protected int id;
 
     public Task(String name, String description) {
         this.name = name;
-        this.status = "NEW";
+        this.status = Status.NEW;
         this.description = description;
     }
 
