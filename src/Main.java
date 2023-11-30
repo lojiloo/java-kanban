@@ -1,6 +1,9 @@
+import tasks.*;
+import managers.*;
+
 public class Main {
     public static void main(String[] args) {
-        InMemoryTaskManager manager = Managers.getDefault();
+        TaskManager manager = Managers.getDefault();
 
         Epic epic_1 = new Epic("Первый эпик", "Тест"); //1
         manager.addNewEpic(epic_1);
@@ -34,8 +37,9 @@ public class Main {
         manager.getTaskById(9);
         manager.getTaskById(9);
         manager.getTaskById(9);
+        manager.getTaskById(10);
 
-        System.out.println(manager.history.getHistory());
+        System.out.println(manager.getHistory());
 
         subtask_22.status = Status.DONE;
         manager.updateSubtask(subtask_22);
