@@ -8,11 +8,11 @@ import history.*;
 import tasks.*;
 
 public class InMemoryTaskManager implements TaskManager {
-    int id = 0;
-    Map<Integer, Task> tasks = new HashMap<>();
-    Map<Integer, Epic> epics = new HashMap<>();
-    Map<Integer, Subtask> subtasks = new HashMap<>();
-    public HistoryManager history = Managers.getDefaultHistory();
+    protected int id = 0;
+    protected Map<Integer, Task> tasks = new HashMap<>();
+    protected Map<Integer, Epic> epics = new HashMap<>();
+    protected Map<Integer, Subtask> subtasks = new HashMap<>();
+    protected HistoryManager history = Managers.getDefaultHistory();
 
     @Override
     public void addNewTask(Task task) {
@@ -38,7 +38,7 @@ public class InMemoryTaskManager implements TaskManager {
         epics.get(subtask.getEpicId()).checkStatus();
     }
 
-    public int getId() {
+    protected int getId() {
         return ++id;
     }
 

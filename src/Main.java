@@ -1,5 +1,3 @@
-//спасибо большое за комментарии! стало понятнее, что к чему(:
-
 import tasks.*;
 import managers.*;
 
@@ -43,7 +41,7 @@ public class Main {
 
         System.out.println(manager.getHistory());
 
-        subtask_22.status = Status.DONE;
+        subtask_22.setStatus(Status.DONE);
         manager.updateSubtask(subtask_22);
         System.out.println(manager.getListOfEpics());
         System.out.println(manager.getSubtaskById(5));
