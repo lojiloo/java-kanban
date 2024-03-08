@@ -42,6 +42,21 @@ public class InMemoryTaskManager implements TaskManager {
         return ++id;
     }
 
+    public void setId(Task task, int id) {
+
+        if (id <= this.id) {
+            if (getEpicById(id) != null) {
+                getEpicById(id).setId(++this.id);
+            } else if (getTaskById(id) != null) {
+                getTaskById(id).setId(++this.id);
+            } else if (getSubtaskById(id) != null) {
+                getSubtaskById(id).setId(++this.id);
+            }
+        }
+
+        task.setId(id);
+    }
+
     @Override
     public List<Task> getListOfTasks() {
         List<Task> listOfTasks = new ArrayList<>();

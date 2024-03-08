@@ -11,7 +11,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void add(Task task) {
         if (task != null) {
-            history.add(task);
+            history.add(Task.copyOf(task));
         } else {
             return;
         }
