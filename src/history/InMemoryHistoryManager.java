@@ -1,33 +1,80 @@
 package history;
 
 import tasks.Task;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private List<Task> history = new ArrayList<>();
+    private Node<Task> head;
+    private Node<Task> tail;
+    private Map<Integer, Node<Task>> mapping = new LinkedHashMap<>();
 
     @Override
     public void add(Task task) {
         if (task != null) {
-            history.add(Task.copyOf(task));
+            linkLast(task);
+        }
+    }
+
+    public void linkLast(Task task) {
+
+        final Node<Task> oldTail = tail;
+        final Node<Task> newNode = new Node<>(task, null, oldTail);
+        tail = newNode;
+
+        if (mapping.containsKey(task.getId()) && mapping.size() > 1) {
+            remove(task.getId());
         }
 
-        if (history.size() > 10) {
-            history.subList(0,1).clear();
+        if (oldTail == null) {
+            head = newNode;
+        } else {
+            oldTail.next = newNode;
         }
 
-        /* именно для ArrayList не нашла такого метода, который элегантно бы заменил list.remove(0). что-то
-        такое нашлось только для LinkedList... ну и есть методы в ArrayList, задающие min размер, но нигде
-        не нашла такого, чтобы ограничивал max (разве что самой прописать, но будет ли это оправданно, если
-        всегда можно просто удалить первый элемент через нулевой индекс...). В общем, мне нужен волшебный пинок в
-        нужную сторону, если это не та сторона :( */
+        mapping.put(task.getId(), newNode);
+
+    }
+
+    @Override
+    public void remove(int id) {
+        if (mapping.containsKey(id)) {
+            removeNode(mapping.get(id));
+        }
+    }
+
+    public void removeNode(Node<Task> node) {
+
+        if (mapping.size() == 1) {
+            head = null;
+            tail = null;
+            mapping.remove(node.data.getId());
+            return;
+        }
+
+        mapping.remove(node.data.getId());
+
+        if (node.prev == null) {
+            head = node.next;
+            node.next.prev = null;
+        } else if (node.next == null) {
+            tail = node.prev;
+            node.prev.next = null;
+        } else {
+            node.next.prev = node.prev;
+            node.prev.next = node.next;
+        }
     }
 
     @Override
     public List<Task> getHistory() {
-        return new ArrayList<>(history);
-    }
+        List<Task> historyList = new ArrayList<>();
 
+        for (Node<Task> node : mapping.values()) {
+            historyList.add(node.data);
+        }
+
+        return historyList;
+    }
 }
