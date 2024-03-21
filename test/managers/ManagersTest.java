@@ -3,6 +3,7 @@ package managers;
 import tasks.*;
 
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ManagersTest {
@@ -15,7 +16,7 @@ class ManagersTest {
         assertNotNull(testTaskManager, "таскменеджер не инициализирован");
         assertNotNull(testTaskManager.getHistory(), "история просмотров не инициализирована");
 
-        Task testTask = new Task("a","a");
+        Task testTask = new Task("a", "a");
         testTaskManager.addNewTask(testTask);
         assertEquals(1, testTaskManager.getListOfTasks().size(), "нет задач после добавления задачи");
 

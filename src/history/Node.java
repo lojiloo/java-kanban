@@ -1,9 +1,5 @@
 package history;
 
-import tasks.Task;
-
-import java.util.Objects;
-
 public class Node<T> {
     T data;
     Node<T> next;

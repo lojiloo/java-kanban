@@ -1,11 +1,14 @@
 package managers;
 
+import history.HistoryManager;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.Task;
+
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import history.*;
-import tasks.*;
 
 public class InMemoryTaskManager implements TaskManager {
     protected int id = 0;
@@ -132,20 +135,20 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskById(int id) {
-            history.add(tasks.get(id));
-            return tasks.get(id);
+        history.add(tasks.get(id));
+        return tasks.get(id);
     }
 
     @Override
     public Epic getEpicById(int id) {
-            history.add(epics.get(id));
-            return epics.get(id);
+        history.add(epics.get(id));
+        return epics.get(id);
     }
 
     @Override
     public Subtask getSubtaskById(int id) {
-            history.add(subtasks.get(id));
-            return subtasks.get(id);
+        history.add(subtasks.get(id));
+        return subtasks.get(id);
     }
 
     @Override
