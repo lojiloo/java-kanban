@@ -10,7 +10,7 @@ public interface TaskManager {
     void addNewEpic(Epic epic);
 
     void addNewSubtask(Subtask subtask);
-    
+
     void setId(Task task, int id);
 
     List<Task> getListOfTasks();
