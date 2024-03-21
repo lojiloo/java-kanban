@@ -1,9 +1,6 @@
 package managers;
 
-import tasks.Epic;
-import tasks.Subtask;
-import tasks.Task;
-
+import tasks.*;
 import java.util.List;
 
 public interface TaskManager {
@@ -13,7 +10,7 @@ public interface TaskManager {
     void addNewEpic(Epic epic);
 
     void addNewSubtask(Subtask subtask);
-
+    
     void setId(Task task, int id);
 
     List<Task> getListOfTasks();
