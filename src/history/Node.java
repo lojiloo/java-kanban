@@ -1,11 +1,13 @@
 package history;
 
-public class Node<T> {
-    T data;
-    Node<T> next;
-    Node<T> prev;
+import tasks.Task;
 
-    public Node(T data, Node<T> next, Node<T> prev) {
+public class Node {
+    Task data;
+    Node next;
+    Node prev;
+
+    public Node(Task data, Node next, Node prev) {
         this.data = data;
         this.next = next;
         this.prev = prev;

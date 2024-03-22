@@ -3,12 +3,18 @@ package history;
 import managers.*;
 import tasks.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class InMemoryHistoryManagerTest {
 
-    static TaskManager testTaskManager = Managers.getDefault();
+    public TaskManager testTaskManager;
+
+    @BeforeEach
+    void createNewTaskManager() {
+        testTaskManager = Managers.getDefault();
+    }
 
     //история умеет работать с тасками, эпиками и сабтасками (добавить + удалить)
     @Test
@@ -32,6 +38,10 @@ class InMemoryHistoryManagerTest {
 
         assertEquals(0, testTaskManager.getHistory().size(),
                 "история просмотров не удалила Task после того, как он был удалён из менеджера (clearTasksById)");
+    }
+
+    @Test
+    void historyManagerWorksWithEpicsCorrectly() {
 
         Epic testEpic = new Epic("a", "b");
         testTaskManager.addNewEpic(testEpic);

@@ -9,9 +9,9 @@ import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private Node<Task> head;
-    private Node<Task> tail;
-    private Map<Integer, Node<Task>> mapping = new LinkedHashMap<>();
+    private Node head;
+    private Node tail;
+    private Map<Integer, Node> mapping = new LinkedHashMap<>();
 
     @Override
     public void add(Task task) {
@@ -22,8 +22,8 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     public void linkLast(Task task) {
 
-        final Node<Task> oldTail = tail;
-        final Node<Task> newNode = new Node<>(task, null, oldTail);
+        final Node oldTail = tail;
+        final Node newNode = new Node(task, null, oldTail);
         tail = newNode;
 
         if (mapping.containsKey(task.getId()) && mapping.size() > 1) {
@@ -47,7 +47,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-    public void removeNode(Node<Task> node) {
+    public void removeNode(Node node) {
 
         if (mapping.size() == 1) {
             head = null;
@@ -74,7 +74,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     public List<Task> getHistory() {
         List<Task> historyList = new ArrayList<>();
 
-        for (Node<Task> node : mapping.values()) {
+        for (Node node : mapping.values()) {
             historyList.add(node.data);
         }
 
