@@ -16,9 +16,9 @@ class InMemoryHistoryManagerTest {
         testTaskManager = Managers.getDefault();
     }
 
-    //история умеет работать с тасками, эпиками и сабтасками (добавить + удалить)
+    //история умеет добавлять таски
     @Test
-    void historyManagerWorksWithTasksCorrectly() {
+    void historyManagerAddsTasksCorrectly() {
 
         Task testTask1 = new Task("a", "a");
         testTaskManager.addNewTask(testTask1);
@@ -26,7 +26,16 @@ class InMemoryHistoryManagerTest {
 
         assertEquals(testTask1, testTaskManager.getHistory().get(0),
                 "история просмотров не записала обращение к Task");
+    }
 
+    //история умеет удалять таски, если они удалены менеджером
+    @Test
+    void historyManagerClearTasksCorrectly() {
+
+        Task testTask1 = new Task("a", "a");
+
+        testTaskManager.addNewTask(testTask1);
+        testTaskManager.getTaskById(testTask1.getId());
         testTaskManager.clearListOfTasks();
 
         assertEquals(0, testTaskManager.getHistory().size(),
@@ -40,8 +49,9 @@ class InMemoryHistoryManagerTest {
                 "история просмотров не удалила Task после того, как он был удалён из менеджера (clearTasksById)");
     }
 
+    //история умеет добавлять эпики
     @Test
-    void historyManagerWorksWithEpicsCorrectly() {
+    void historyManagerAddsEpicsCorrectly() {
 
         Epic testEpic = new Epic("a", "b");
         testTaskManager.addNewEpic(testEpic);
@@ -49,7 +59,16 @@ class InMemoryHistoryManagerTest {
 
         assertEquals(testEpic, testTaskManager.getHistory().get(0),
                 "история просмотров не записала обращение к Epic");
+    }
 
+    //история умеет удалять эпики, если они удалены менеджером
+    @Test
+    void historyManagerClearEpicsCorrectly() {
+
+        Epic testEpic = new Epic("a", "b");
+
+        testTaskManager.addNewEpic(testEpic);
+        testTaskManager.getEpicById(testEpic.getId());
         testTaskManager.clearListOfEpics();
 
         assertEquals(0, testTaskManager.getHistory().size(),
@@ -63,9 +82,9 @@ class InMemoryHistoryManagerTest {
                 "история просмотров не удалила Epic после того, как он был удалён из менеджера (clearEpicsById)");
     }
 
-    //после удаления эпика из истории исчезают и все его подзадачи
+    //история умеет добавлять сабтаски
     @Test
-    void historyRemovesSubsWhenEpicIsRemoved() {
+    void historyManagerAddsSubsCorrectly() {
 
         Epic testEpic = new Epic("a", "b");
         testTaskManager.addNewEpic(testEpic);
@@ -76,20 +95,35 @@ class InMemoryHistoryManagerTest {
 
         assertEquals(testSub, testTaskManager.getHistory().get(0),
                 "история просмотров не записала обращение к Subtask");
+    }
 
+    //после удаления эпика из истории исчезают и все его подзадачи
+    @Test
+    void historyRemovesSubsWhenEpicIsRemoved() {
+
+        Epic testEpic = new Epic("a", "b");
+        testTaskManager.addNewEpic(testEpic);
+
+        Subtask testSub = new Subtask("a", "b", testEpic.getId());
+        testTaskManager.addNewSubtask(testSub);
+
+        testTaskManager.getSubtaskById(testSub.getId());
         testTaskManager.clearSubtasksById(testSub.getId());
+
         assertEquals(0, testTaskManager.getHistory().size(),
                 "история просмотров не удалила Subtask после того, как он был удалён из менеджера (clearSubtasksById)");
 
         testTaskManager.addNewSubtask(testSub);
         testTaskManager.getSubtaskById(testSub.getId());
         testTaskManager.clearListOfSubtasks();
+
         assertEquals(0, testTaskManager.getHistory().size(),
                 "история просмотров не удалила Subtask после того, как он был удалён из менеджера (clearListOfSubtasks)");
 
         testTaskManager.addNewSubtask(testSub);
         testTaskManager.getSubtaskById(testSub.getId());
         testTaskManager.clearListOfEpics();
+
         assertEquals(0, testTaskManager.getHistory().size(),
                 "история просмотров не удалила Subtask после того, как он был удалён из менеджера (clearListOfEpics)");
     }
@@ -97,7 +131,7 @@ class InMemoryHistoryManagerTest {
     //история не дублирует записи при повторном просмотре, но оставляет последний
     @Test
     void historyContainsUniqueElementsAndShowsTheLastAccessing() {
-        TaskManager testTaskManager = Managers.getDefault();
+
         Task testTask = new Task("a", "a");
         testTaskManager.addNewTask(testTask);
 
@@ -122,5 +156,4 @@ class InMemoryHistoryManagerTest {
         assertEquals(testTask.getId(), testTaskManager.getHistory().get(1).getId(),
                 "история просмотров не перезаписала повторное обращение");
     }
-
 }

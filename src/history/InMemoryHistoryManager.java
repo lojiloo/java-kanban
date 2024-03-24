@@ -24,11 +24,12 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         final Node oldTail = tail;
         final Node newNode = new Node(task, null, oldTail);
-        tail = newNode;
 
-        if (mapping.containsKey(task.getId()) && mapping.size() > 1) {
+        if (mapping.containsKey(task.getId())) {
             remove(task.getId());
         }
+
+        tail = newNode;
 
         if (oldTail == null) {
             head = newNode;
@@ -37,7 +38,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
 
         mapping.put(task.getId(), newNode);
-
     }
 
     @Override
