@@ -3,6 +3,7 @@ package managers;
 import tasks.*;
 
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ManagersTest {
@@ -15,7 +16,7 @@ class ManagersTest {
         assertNotNull(testTaskManager, "таскменеджер не инициализирован");
         assertNotNull(testTaskManager.getHistory(), "история просмотров не инициализирована");
 
-        Task testTask = new Task("a","a");
+        Task testTask = new Task("a", "a");
         testTaskManager.addNewTask(testTask);
         assertEquals(1, testTaskManager.getListOfTasks().size(), "нет задач после добавления задачи");
 
@@ -24,33 +25,10 @@ class ManagersTest {
 
         testTaskManager.clearListOfTasks();
         assertEquals(0, testTaskManager.getListOfTasks().size(), "список задач не обнулён");
+        assertEquals(0, testTaskManager.getHistory().size(), "история не обнулена");
     }
 
-    //история просмотров содержит ровно 10 последних тасков
-    @Test
-    void shouldContainTheLastTenTasks() {
-        TaskManager testTaskManager = Managers.getDefault();
-        Task testTask = new Task("a", "a");
-        testTaskManager.addNewTask(testTask);
-
-        int i = 0;
-        while (i < 12) {
-            testTaskManager.getTaskById(1);
-            ++i;
-        }
-
-        assertEquals(10, testTaskManager.getHistory().size(),
-                "история просмотров содержит более 10 элементов");
-
-        Task testTaskDifferent = new Task("b", "b");
-        testTaskManager.addNewTask(testTaskDifferent);
-        testTaskManager.getTaskById(testTaskDifferent.getId());
-
-        assertEquals(testTaskDifferent.getId(), testTaskManager.getHistory().get(9).getId(),
-                "история просмотров не записала последний элемент");
-    }
-
-    //менеджер умеет обавлять задачи разных типов и умеет находить их по ID
+    //менеджер умеет обновлять задачи разных типов и умеет находить их по ID
     @Test
     void InMemoryTaskManagerWorksWithAnyTypeOfTasks() {
         TaskManager testTaskManager = Managers.getDefault();
@@ -109,22 +87,6 @@ class ManagersTest {
                 "таск изменил значение переменной description после добавления в менеджер");
         assertEquals(taskStatus, testTaskManager.getTaskById(testTask.getId()).getStatus(),
                 "таск изменил значение переменной status после добавления в менеджер");
-    }
-
-    //задачи, добавляемые в HistoryManager, сохраняют предыдущую версию задачи и её данных
-    @Test
-    void historyManagerSavesLastVersionOfTask() {
-        TaskManager testTaskManager = Managers.getDefault();
-
-        Task testTask = new Task("a", "b");
-        testTaskManager.addNewTask(testTask);
-        testTaskManager.getTaskById(1);
-
-        testTask.setName("name");
-        testTaskManager.updateTask(testTask);
-        testTaskManager.getTaskById(1);
-
-        assertNotEquals(testTaskManager.getHistory().get(0), testTaskManager.getHistory().get(1));
     }
 
 }
