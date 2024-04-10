@@ -11,7 +11,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     private Node head;
     private Node tail;
-    private Map<Integer, Node> mapping = new LinkedHashMap<>();
+    private final Map<Integer, Node> mapping = new LinkedHashMap<>();
 
     @Override
     public void add(Task task) {

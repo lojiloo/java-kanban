@@ -54,32 +54,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         System.out.println(manager2.getHistory());
     }
 
-    public void save() throws ManagerSaveException {
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(path))) {
-
-            //собираю задачи в файл
-            List<Task> currentTasks = getListOfTasks();
-            currentTasks.addAll(getListOfEpics());
-            currentTasks.addAll(getListOfSubtasks());
-
-            StringBuilder builder = new StringBuilder();
-            bufferedWriter.write("id,type,name,status,description,epic\n");
-            for (Task task : currentTasks) {
-                builder.append(task.toString());
-            }
-            bufferedWriter.write(builder.toString());
-
-            //записываю историю в этот же файл
-            if (!super.getHistory().isEmpty()) {
-                String currentHistory = historyToString(super.history);
-                bufferedWriter.write(currentHistory);
-            }
-
-        } catch (IOException e) {
-            throw new ManagerSaveException();
-        }
-    }
-
     static FileBackedTaskManager loadFromFile(File file) {
         FileBackedTaskManager manager = new FileBackedTaskManager(file.getAbsolutePath());
 
@@ -143,6 +117,56 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return manager;
     }
 
+    static String historyToString(HistoryManager manager) {
+        StringBuilder builder = new StringBuilder();
+        List<Task> tasks = manager.getHistory();
+
+        builder.append("id,type,name,status,description,epic\n");
+        for (Task task : tasks) {
+            builder.append(task.toString());
+        }
+
+        return builder.toString();
+    }
+
+    static List<Integer> historyFromString(String value) {
+        List<Integer> id = new ArrayList<>();
+
+        String[] currentHistory = value.split("\n");
+        for (String line : currentHistory) {
+            String[] task = line.split(",");
+            id.add(Integer.parseInt(task[0]));
+        }
+
+        return id;
+    }
+
+    public void save() throws ManagerSaveException {
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(path))) {
+
+            //собираю задачи в файл
+            List<Task> currentTasks = getListOfTasks();
+            currentTasks.addAll(getListOfEpics());
+            currentTasks.addAll(getListOfSubtasks());
+
+            StringBuilder builder = new StringBuilder();
+            bufferedWriter.write("id,type,name,status,description,epic\n");
+            for (Task task : currentTasks) {
+                builder.append(task.toString());
+            }
+            bufferedWriter.write(builder.toString());
+
+            //записываю историю в этот же файл
+            if (!super.getHistory().isEmpty()) {
+                String currentHistory = historyToString(super.history);
+                bufferedWriter.write(currentHistory);
+            }
+
+        } catch (IOException e) {
+            throw new ManagerSaveException();
+        }
+    }
+
     private Task fromString(String value) {
         String[] taskFields = value.split(",");
 
@@ -173,30 +197,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
                 return task;
         }
-    }
-
-    static String historyToString(HistoryManager manager) {
-        StringBuilder builder = new StringBuilder();
-        List<Task> tasks = manager.getHistory();
-
-        builder.append("id,type,name,status,description,epic\n");
-        for (Task task : tasks) {
-            builder.append(task.toString());
-        }
-
-        return builder.toString();
-    }
-
-    static List<Integer> historyFromString(String value) {
-        List<Integer> id = new ArrayList<>();
-
-        String[] currentHistory = value.split("\n");
-        for (String line : currentHistory) {
-            String[] task = line.split(",");
-            id.add(Integer.parseInt(task[0]));
-        }
-
-        return id;
     }
 
     @Override
