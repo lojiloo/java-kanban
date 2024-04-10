@@ -1,159 +1,164 @@
 package history;
 
-import managers.*;
-import tasks.*;
-import org.junit.jupiter.api.Test;
+import managers.FileBackedTaskManager;
+import managers.TaskManager;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import tasks.Epic;
+import tasks.Subtask;
+import tasks.Task;
+
+import java.io.File;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class InMemoryHistoryManagerTest {
 
-    public TaskManager testTaskManager;
+    private File tempFile;
+    private TaskManager testFileBackedTaskManager;
 
     @BeforeEach
-    void createNewTaskManager() {
-        testTaskManager = Managers.getDefault();
+    void createTempFile() {
+        try {
+            tempFile = File.createTempFile("tempFile", "txt");
+            testFileBackedTaskManager = new FileBackedTaskManager(tempFile.getAbsolutePath());
+        } catch (IOException e) {
+            e.getStackTrace();
+        }
     }
 
     //история умеет добавлять таски
     @Test
     void historyManagerAddsTasksCorrectly() {
-
         Task testTask1 = new Task("a", "a");
-        testTaskManager.addNewTask(testTask1);
-        testTaskManager.getTaskById(testTask1.getId());
+        testFileBackedTaskManager.addNewTask(testTask1);
+        testFileBackedTaskManager.getTaskById(testTask1.getId());
 
-        assertEquals(testTask1, testTaskManager.getHistory().get(0),
+        assertEquals(testTask1, testFileBackedTaskManager.getHistory().get(0),
                 "история просмотров не записала обращение к Task");
     }
 
     //история умеет удалять таски, если они удалены менеджером
     @Test
     void historyManagerClearTasksCorrectly() {
-
         Task testTask1 = new Task("a", "a");
 
-        testTaskManager.addNewTask(testTask1);
-        testTaskManager.getTaskById(testTask1.getId());
-        testTaskManager.clearListOfTasks();
+        testFileBackedTaskManager.addNewTask(testTask1);
+        testFileBackedTaskManager.getTaskById(testTask1.getId());
+        testFileBackedTaskManager.clearListOfTasks();
 
-        assertEquals(0, testTaskManager.getHistory().size(),
+        assertEquals(0, testFileBackedTaskManager.getHistory().size(),
                 "история просмотров не удалила Task после того, как он был удалён из менеджера (clearListOfTasks)");
 
-        testTaskManager.addNewTask(testTask1);
-        testTaskManager.getTaskById(testTask1.getId());
-        testTaskManager.clearTasksById(testTask1.getId());
+        testFileBackedTaskManager.addNewTask(testTask1);
+        testFileBackedTaskManager.getTaskById(testTask1.getId());
+        testFileBackedTaskManager.clearTasksById(testTask1.getId());
 
-        assertEquals(0, testTaskManager.getHistory().size(),
+        assertEquals(0, testFileBackedTaskManager.getHistory().size(),
                 "история просмотров не удалила Task после того, как он был удалён из менеджера (clearTasksById)");
     }
 
     //история умеет добавлять эпики
     @Test
     void historyManagerAddsEpicsCorrectly() {
-
         Epic testEpic = new Epic("a", "b");
-        testTaskManager.addNewEpic(testEpic);
-        testTaskManager.getEpicById(testEpic.getId());
+        testFileBackedTaskManager.addNewEpic(testEpic);
+        testFileBackedTaskManager.getEpicById(testEpic.getId());
 
-        assertEquals(testEpic, testTaskManager.getHistory().get(0),
+        assertEquals(testEpic, testFileBackedTaskManager.getHistory().get(0),
                 "история просмотров не записала обращение к Epic");
     }
 
     //история умеет удалять эпики, если они удалены менеджером
     @Test
     void historyManagerClearEpicsCorrectly() {
-
         Epic testEpic = new Epic("a", "b");
 
-        testTaskManager.addNewEpic(testEpic);
-        testTaskManager.getEpicById(testEpic.getId());
-        testTaskManager.clearListOfEpics();
+        testFileBackedTaskManager.addNewEpic(testEpic);
+        testFileBackedTaskManager.getEpicById(testEpic.getId());
+        testFileBackedTaskManager.clearListOfEpics();
 
-        assertEquals(0, testTaskManager.getHistory().size(),
+        assertEquals(0, testFileBackedTaskManager.getHistory().size(),
                 "история просмотров не удалила Epic после того, как он был удалён из менеджера (clearListOfEpics)");
 
-        testTaskManager.addNewEpic(testEpic);
-        testTaskManager.getEpicById(testEpic.getId());
-        testTaskManager.clearEpicsById(testEpic.getId());
+        testFileBackedTaskManager.addNewEpic(testEpic);
+        testFileBackedTaskManager.getEpicById(testEpic.getId());
+        testFileBackedTaskManager.clearEpicsById(testEpic.getId());
 
-        assertEquals(0, testTaskManager.getHistory().size(),
+        assertEquals(0, testFileBackedTaskManager.getHistory().size(),
                 "история просмотров не удалила Epic после того, как он был удалён из менеджера (clearEpicsById)");
     }
 
     //история умеет добавлять сабтаски
     @Test
     void historyManagerAddsSubsCorrectly() {
-
         Epic testEpic = new Epic("a", "b");
-        testTaskManager.addNewEpic(testEpic);
+        testFileBackedTaskManager.addNewEpic(testEpic);
 
         Subtask testSub = new Subtask("a", "b", testEpic.getId());
-        testTaskManager.addNewSubtask(testSub);
-        testTaskManager.getSubtaskById(testSub.getId());
+        testFileBackedTaskManager.addNewSubtask(testSub);
+        testFileBackedTaskManager.getSubtaskById(testSub.getId());
 
-        assertEquals(testSub, testTaskManager.getHistory().get(0),
+        assertEquals(testSub, testFileBackedTaskManager.getHistory().get(0),
                 "история просмотров не записала обращение к Subtask");
     }
 
     //после удаления эпика из истории исчезают и все его подзадачи
     @Test
     void historyRemovesSubsWhenEpicIsRemoved() {
-
         Epic testEpic = new Epic("a", "b");
-        testTaskManager.addNewEpic(testEpic);
+        testFileBackedTaskManager.addNewEpic(testEpic);
 
         Subtask testSub = new Subtask("a", "b", testEpic.getId());
-        testTaskManager.addNewSubtask(testSub);
+        testFileBackedTaskManager.addNewSubtask(testSub);
 
-        testTaskManager.getSubtaskById(testSub.getId());
-        testTaskManager.clearSubtasksById(testSub.getId());
+        testFileBackedTaskManager.getSubtaskById(testSub.getId());
+        testFileBackedTaskManager.clearSubtasksById(testSub.getId());
 
-        assertEquals(0, testTaskManager.getHistory().size(),
+        assertEquals(0, testFileBackedTaskManager.getHistory().size(),
                 "история просмотров не удалила Subtask после того, как он был удалён из менеджера (clearSubtasksById)");
 
-        testTaskManager.addNewSubtask(testSub);
-        testTaskManager.getSubtaskById(testSub.getId());
-        testTaskManager.clearListOfSubtasks();
+        testFileBackedTaskManager.addNewSubtask(testSub);
+        testFileBackedTaskManager.getSubtaskById(testSub.getId());
+        testFileBackedTaskManager.clearListOfSubtasks();
 
-        assertEquals(0, testTaskManager.getHistory().size(),
+        assertEquals(0, testFileBackedTaskManager.getHistory().size(),
                 "история просмотров не удалила Subtask после того, как он был удалён из менеджера (clearListOfSubtasks)");
 
-        testTaskManager.addNewSubtask(testSub);
-        testTaskManager.getSubtaskById(testSub.getId());
-        testTaskManager.clearListOfEpics();
+        testFileBackedTaskManager.addNewSubtask(testSub);
+        testFileBackedTaskManager.getSubtaskById(testSub.getId());
+        testFileBackedTaskManager.clearListOfEpics();
 
-        assertEquals(0, testTaskManager.getHistory().size(),
+        assertEquals(0, testFileBackedTaskManager.getHistory().size(),
                 "история просмотров не удалила Subtask после того, как он был удалён из менеджера (clearListOfEpics)");
     }
 
     //история не дублирует записи при повторном просмотре, но оставляет последний
     @Test
     void historyContainsUniqueElementsAndShowsTheLastAccessing() {
-
         Task testTask = new Task("a", "a");
-        testTaskManager.addNewTask(testTask);
+        testFileBackedTaskManager.addNewTask(testTask);
 
         int i = 0;
         while (i < 12) {
-            testTaskManager.getTaskById(testTask.getId());
+            testFileBackedTaskManager.getTaskById(testTask.getId());
             ++i;
         }
 
-        assertEquals(1, testTaskManager.getHistory().size(),
+        assertEquals(1, testFileBackedTaskManager.getHistory().size(),
                 "история просмотров содержит более 1-го элемента после повторных обращений");
 
         Task testTaskDiff = new Task("b", "b");
-        testTaskManager.addNewTask(testTaskDiff);
-        testTaskManager.getTaskById(testTaskDiff.getId());
+        testFileBackedTaskManager.addNewTask(testTaskDiff);
+        testFileBackedTaskManager.getTaskById(testTaskDiff.getId());
 
-        assertEquals(testTaskDiff.getId(), testTaskManager.getHistory().get(1).getId(),
+        assertEquals(testTaskDiff.getId(), testFileBackedTaskManager.getHistory().get(1).getId(),
                 "история просмотров не записала последний элемент");
 
-        testTaskManager.getTaskById(testTask.getId());
+        testFileBackedTaskManager.getTaskById(testTask.getId());
 
-        assertEquals(testTask.getId(), testTaskManager.getHistory().get(1).getId(),
+        assertEquals(testTask.getId(), testFileBackedTaskManager.getHistory().get(1).getId(),
                 "история просмотров не перезаписала повторное обращение");
     }
 }

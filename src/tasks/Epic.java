@@ -1,13 +1,17 @@
 package tasks;
 
+import managers.TaskType;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Epic extends Task {
+    //protected TaskType type = TaskType.EPIC;
     private List<Subtask> subtasks = new ArrayList<>();
 
     public Epic(String name, String description) {
         super(name, description);
+        this.type = TaskType.EPIC;
     }
 
     public List<Subtask> getSubtasks() {
@@ -41,5 +45,10 @@ public class Epic extends Task {
         } else {
             this.status = Status.NEW;
         }
+    }
+
+    @Override
+    public String toString() {
+        return id + ",EPIC," + name + "," + status + "," + description + ",\n";
     }
 }

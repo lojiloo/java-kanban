@@ -1,11 +1,14 @@
 package tasks;
 
+import managers.TaskType;
+
 public class Subtask extends Task {
     private int epicId;
 
     public Subtask(String name, String description, int epicId) {
         super(name, description);
         this.epicId = epicId;
+        this.type = TaskType.SUBTASK;
     }
 
     public int getEpicId() {
@@ -14,10 +17,6 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "Название: " + name
-                + ". ID: " + id
-                + ". Описание: " + description
-                + ". Статус: " + status
-                + ". Связанный эпик: " + epicId + " ";
+        return id + ",SUBTASK," + name + "," + status + "," + description + "," + epicId + ",\n";
     }
 }

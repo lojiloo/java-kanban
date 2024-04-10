@@ -1,5 +1,7 @@
 package tasks;
 
+import managers.TaskType;
+
 import java.util.Objects;
 
 public class Task {
@@ -7,6 +9,7 @@ public class Task {
     protected Status status;
     protected String description;
     protected int id;
+    protected TaskType type = TaskType.TASK;
 
     public Task(String name, String description) {
         this.name = name;
@@ -46,6 +49,10 @@ public class Task {
         this.description = description;
     }
 
+    public TaskType getType() {
+        return type;
+    }
+
     public static Task copyOf(Task original) {
         Task copy = new Task(original.getName(), original.getDescription());
         copy.setStatus(original.getStatus());
@@ -56,10 +63,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Название: " + name
-                + ". ID: " + id
-                + ". Описание: " + description
-                + ". Статус: " + status;
+        return id + ",TASK," + name + "," + status + "," + description + ",\n";
     }
 
     @Override

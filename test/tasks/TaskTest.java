@@ -1,41 +1,56 @@
 package tasks;
 
+import managers.FileBackedTaskManager;
 import managers.Managers;
 import managers.TaskManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.io.File;
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TaskTest {
-    static private TaskManager testManager = Managers.getDefault();
+    private File tempFile;
+    private TaskManager testFileBackedTaskManager;
+
+    @BeforeEach
+    void createTempFile() {
+        try {
+            tempFile = File.createTempFile("tempFile", "txt");
+            testFileBackedTaskManager = new FileBackedTaskManager(tempFile.getAbsolutePath());
+        } catch (IOException e) {
+            e.getStackTrace();
+        }
+    }
 
     //после обновления таска успешно меняются его имя, описание, статус и айди
     @Test
     void fieldsShouldBeUpdatedWhenTaskHasBeenUpdated() {
         Task testTask = new Task("a", "b");
-        testManager.addNewTask(testTask);
+        testFileBackedTaskManager.addNewTask(testTask);
         testTask.setName("name");
-        testManager.updateTask(testTask);
+        testFileBackedTaskManager.updateTask(testTask);
 
         assertEquals("name", testTask.getName(),
                 "после обновления таска его имя не изменилось");
 
         testTask.setDescription("description");
-        testManager.updateTask(testTask);
+        testFileBackedTaskManager.updateTask(testTask);
 
         assertEquals("description", testTask.getDescription(),
                 "после обновления таска его описание не изменилось");
 
         testTask.setId(100);
-        testManager.updateTask(testTask);
+        testFileBackedTaskManager.updateTask(testTask);
 
         assertEquals(100, testTask.getId(),
                 "после обновления таска его айди не изменился");
 
 
         testTask.setStatus(Status.DONE);
-        testManager.updateTask(testTask);
+        testFileBackedTaskManager.updateTask(testTask);
 
         assertEquals(Status.DONE, testTask.getStatus(),
                 "после обновления таска его статус не изменился");
