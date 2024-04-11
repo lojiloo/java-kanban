@@ -9,9 +9,9 @@ import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
+    private final Map<Integer, Node> mapping = new LinkedHashMap<>();
     private Node head;
     private Node tail;
-    private final Map<Integer, Node> mapping = new LinkedHashMap<>();
 
     @Override
     public void add(Task task) {

@@ -21,7 +21,9 @@ public class InMemoryTaskManager implements TaskManager {
     public void addNewTask(Task task) {
         if (task.getId() == 0) {
             int id = getId();
-            task.setId(id);
+            setId(task, id);
+        } else {
+            this.id = task.getId();
         }
         tasks.put(task.getId(), task);
     }
@@ -30,7 +32,9 @@ public class InMemoryTaskManager implements TaskManager {
     public void addNewEpic(Epic epic) {
         if (epic.getId() == 0) {
             int id = getId();
-            epic.setId(id);
+            setId(epic, id);
+        } else {
+            this.id = epic.getId();
         }
         epics.put(epic.getId(), epic);
     }
@@ -39,7 +43,9 @@ public class InMemoryTaskManager implements TaskManager {
     public void addNewSubtask(Subtask subtask) {
         if (subtask.getId() == 0) {
             int id = getId();
-            subtask.setId(id);
+            setId(subtask, id);
+        } else {
+            this.id = subtask.getId();
         }
         subtasks.put(subtask.getId(), subtask);
 
@@ -52,17 +58,15 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public void setId(Task task, int id) {
-
         if (id <= this.id) {
-            if (getEpicById(id) != null) {
+            if (epics.get(id) != null) {
                 getEpicById(id).setId(++this.id);
-            } else if (getTaskById(id) != null) {
+            } else if (tasks.get(id) != null) {
                 getTaskById(id).setId(++this.id);
-            } else if (getSubtaskById(id) != null) {
+            } else if (subtasks.get(id) != null) {
                 getSubtaskById(id).setId(++this.id);
             }
         }
-
         task.setId(id);
     }
 

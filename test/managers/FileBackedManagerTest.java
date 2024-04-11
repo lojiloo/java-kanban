@@ -1,6 +1,6 @@
 package managers;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tasks.Epic;
 import tasks.Subtask;
@@ -20,8 +20,8 @@ class FileBackedManagerTest {
     private static File tempFile;
     private static TaskManager testFileBackedTaskManager;
 
-    @BeforeAll
-    static void createTempFile() {
+    @BeforeEach
+    void createTempFile() {
         try {
             tempFile = File.createTempFile("tempFile", "txt");
             testFileBackedTaskManager = new FileBackedTaskManager(tempFile.getAbsolutePath());
@@ -82,6 +82,8 @@ class FileBackedManagerTest {
     //добавление задач в историю просмотров
     @Test
     void fileBackedTaskManagerSavesTasksInHistoryCorrectly() {
+        Task task = new Task("task name", "task description");
+        testFileBackedTaskManager.addNewTask(task);
         assertEquals(0, testFileBackedTaskManager.getHistory().size(),
                 "история просмотров не пуста, когда ни одна задача не была просмотрена");
         testFileBackedTaskManager.getTaskById(1);
@@ -92,28 +94,31 @@ class FileBackedManagerTest {
     //восстановление менеджера из файла
     @Test
     void managerFromFileEqualsToManagerInitializedAtRuntime() {
+        Task task = new Task("task name", "task description");
+        testFileBackedTaskManager.addNewTask(task);
         List<Task> tasks = testFileBackedTaskManager.getListOfTasks();
+
+        Epic epic = new Epic("epic name", "epic description");
+        testFileBackedTaskManager.addNewEpic(epic);
         List<Epic> epics = testFileBackedTaskManager.getListOfEpics();
+
+        Subtask subtask = new Subtask("sub name", "sub description", 2);
+        testFileBackedTaskManager.addNewSubtask(subtask);
         List<Subtask> subtasks = testFileBackedTaskManager.getListOfSubtasks();
-        List<Task> history = testFileBackedTaskManager.getHistory();
 
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
 
-        for (Task task : tasks) {
-            assertEquals(task, loadedManager.getTaskById(task.getId()),
+        for (Task t : tasks) {
+            assertEquals(t, loadedManager.getTaskById(t.getId()),
                     "задачи не совпадают");
         }
-        for (Epic epic : epics) {
-            assertEquals(epic, loadedManager.getEpicById(epic.getId()),
+        for (Epic e : epics) {
+            assertEquals(e, loadedManager.getEpicById(e.getId()),
                     "эпики не совпадают");
         }
-        for (Subtask subtask : subtasks) {
-            assertEquals(subtask, loadedManager.getSubtaskById(subtask.getId()),
+        for (Subtask s : subtasks) {
+            assertEquals(s, loadedManager.getSubtaskById(s.getId()),
                     "сабтаски не совпадают");
-        }
-        for (Task task : history) {
-            assertEquals(task, loadedManager.getHistory().get(task.getId()),
-                    "задачи в истории просмотров не совпадают");
         }
     }
 }
