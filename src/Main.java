@@ -1,21 +1,21 @@
 import managers.FileBackedTaskManager;
-import tasks.Epic;
+import tasks.Subtask;
+import tasks.Task;
 
 import java.io.File;
 
 public class Main {
     public static void main(String[] args) {
         /*FileBackedTaskManager manager = new FileBackedTaskManager("file.txt");
-
-        Epic epic = new Epic("epic name", "epic description");
-        manager.addNewEpic(epic);
-        manager.getEpicById(epic.getId());
-        System.out.println(manager.getListOfEpics());*/
+        Epic epic1 = new Epic("epic1 name", "epic1 description");
+        manager.addNewEpic(epic1);
+        Subtask sub1 = new Subtask("sub1 name", "sub1 description", epic1.getId());
+        manager.addNewSubtask(sub1);*/
 
         FileBackedTaskManager manager2 = FileBackedTaskManager.loadFromFile(new File("file.txt"));
-        Epic epic2 = new Epic("epic2 name", "epic2 description");
-        manager2.addNewEpic(epic2);
-        System.out.println(manager2.getListOfEpics());
-        System.out.println(manager2.getHistory());
+        Task task1 = new Task("task1 name", "task1 description");
+        manager2.addNewTask(task1);
+        Subtask sub2 = new Subtask("sub2 name", "sub2 description", manager2.getListOfEpics().get(0).getId());
+        manager2.addNewSubtask(sub2);
     }
 }

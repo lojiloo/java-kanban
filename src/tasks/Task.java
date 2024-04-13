@@ -17,13 +17,14 @@ public class Task {
         this.description = description;
     }
 
-    public static Task copyOf(Task original) {
+    /*public static Task copyOf(Task original) {
         Task copy = new Task(original.getName(), original.getDescription());
         copy.setStatus(original.getStatus());
         copy.setId(original.getId());
+        copy.setStatus(original.getStatus());
 
         return copy;
-    }
+    }*/
 
     public int getId() {
         return id;

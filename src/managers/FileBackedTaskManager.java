@@ -80,7 +80,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
 
         } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка менеджера");
+            throw new ManagerSaveException("Ошибка менеджера: ошибка при сохранении в файл", e);
         }
 
         return manager;
@@ -131,7 +131,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
 
         } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка менеджера");
+            throw new ManagerSaveException("Ошибка менеджера: ошибка при сохранении в файл", e);
         }
     }
 
