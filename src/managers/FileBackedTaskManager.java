@@ -40,19 +40,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     break;
                 }
             }
-
-
             for (Task task : memory) {
-                switch (task.getType()) {
-                    case EPIC:
-                        manager.addNewEpic((Epic) task);
-                        break;
-                    case SUBTASK:
-                        manager.addNewSubtask((Subtask) task);
-                        break;
-                    default:
-                        manager.addNewTask(task);
-                }
+                manager.addFromFile(task);
             }
 
             if (lines.length > lineCounter) {

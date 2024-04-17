@@ -19,40 +19,67 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void addNewTask(Task task) {
-        if (task.getId() == 0) {
+        try {
+            if (task.getId() != 0) {
+                throw new RuntimeException("id не может быть установлен вручную");
+            }
             int id = getId();
-            setId(task, id);
-        } else {
-            this.id = task.getId();
-            setId(task, task.getId());
+            task.setId(id);
+            tasks.put(id, task);
+        } catch (RuntimeException e) {
+            System.out.println("для новой задачи был введён id:");
+            System.out.println(e.getMessage());
         }
-        tasks.put(task.getId(), task);
     }
 
     @Override
     public void addNewEpic(Epic epic) {
-        if (epic.getId() == 0) {
+        try {
+            if (epic.getId() != 0) {
+                throw new RuntimeException("id не может быть установлен вручную");
+            }
             int id = getId();
-            setId(epic, id);
-        } else {
-            setId(epic, epic.getId());
+            epic.setId(id);
+            epics.put(id, epic);
+        } catch (RuntimeException e) {
+            System.out.println("для нового эпика был введён id:");
+            System.out.println(e.getMessage());
         }
-        epics.put(epic.getId(), epic);
     }
 
     @Override
     public void addNewSubtask(Subtask subtask) {
-        if (subtask.getId() == 0) {
+        try {
+            if (subtask.getId() != 0) {
+                throw new RuntimeException("id не может быть установлен вручную");
+            }
             int id = getId();
-            setId(subtask, id);
-        } else {
-            this.id = subtask.getId();
-            setId(subtask, subtask.getId());
-        }
-        subtasks.put(subtask.getId(), subtask);
+            subtask.setId(id);
 
-        epics.get(subtask.getEpicId()).getSubtasks().add(subtask);
-        epics.get(subtask.getEpicId()).checkStatus();
+            subtasks.put(id, subtask);
+            epics.get(subtask.getEpicId()).getSubtasks().add(subtask);
+            epics.get(subtask.getEpicId()).checkStatus();
+        } catch (RuntimeException e) {
+            System.out.println("для новой подзадачи был введён id:");
+            System.out.println(e.getMessage());
+        }
+    }
+
+    protected void addFromFile(Task task) {
+        if (task.getId() > this.id) {
+            this.id = task.getId();
+        }
+
+        switch (task.getType()) {
+            case TASK:
+                tasks.put(task.getId(), task);
+                break;
+            case EPIC:
+                epics.put(task.getId(), (Epic) task);
+                break;
+            case SUBTASK:
+                subtasks.put(task.getId(), (Subtask) task);
+        }
     }
 
     protected int getId() {
