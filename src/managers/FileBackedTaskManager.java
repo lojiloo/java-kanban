@@ -41,7 +41,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
             }
             for (Task task : memory) {
-                manager.addFromFile(task);
+                try {
+                    manager.addInternal(task);
+                } catch (IllegalArgumentException e) {
+                    System.out.println(e.getMessage());
+                }
             }
 
             if (lines.length > lineCounter) {

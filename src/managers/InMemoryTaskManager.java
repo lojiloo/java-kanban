@@ -18,54 +18,39 @@ public class InMemoryTaskManager implements TaskManager {
     protected HistoryManager history = Managers.getDefaultHistory();
 
     @Override
-    public void addNewTask(Task task) {
-        try {
-            if (task.getId() != 0) {
-                throw new RuntimeException("id не может быть установлен вручную");
-            }
-            int id = getId();
-            task.setId(id);
-            tasks.put(id, task);
-        } catch (RuntimeException e) {
-            System.out.println("для новой задачи был введён id:");
-            System.out.println(e.getMessage());
+    public void addNewTask(Task task) throws IllegalArgumentException {
+        if (task.getId() != 0) {
+            throw new IllegalArgumentException("id не может быть установлен вручную");
         }
+        int id = getId();
+        task.setId(id);
+        tasks.put(id, task);
     }
 
     @Override
-    public void addNewEpic(Epic epic) {
-        try {
-            if (epic.getId() != 0) {
-                throw new RuntimeException("id не может быть установлен вручную");
-            }
-            int id = getId();
-            epic.setId(id);
-            epics.put(id, epic);
-        } catch (RuntimeException e) {
-            System.out.println("для нового эпика был введён id:");
-            System.out.println(e.getMessage());
+    public void addNewEpic(Epic epic) throws IllegalArgumentException {
+        if (epic.getId() != 0) {
+            throw new IllegalArgumentException("id не может быть установлен вручную");
         }
+        int id = getId();
+        epic.setId(id);
+        epics.put(id, epic);
     }
 
     @Override
-    public void addNewSubtask(Subtask subtask) {
-        try {
-            if (subtask.getId() != 0) {
-                throw new RuntimeException("id не может быть установлен вручную");
-            }
-            int id = getId();
-            subtask.setId(id);
-
-            subtasks.put(id, subtask);
-            epics.get(subtask.getEpicId()).getSubtasks().add(subtask);
-            epics.get(subtask.getEpicId()).checkStatus();
-        } catch (RuntimeException e) {
-            System.out.println("для новой подзадачи был введён id:");
-            System.out.println(e.getMessage());
+    public void addNewSubtask(Subtask subtask) throws IllegalArgumentException {
+        if (subtask.getId() != 0) {
+            throw new IllegalArgumentException("id не может быть установлен вручную");
         }
+        int id = getId();
+        subtask.setId(id);
+
+        subtasks.put(id, subtask);
+        epics.get(subtask.getEpicId()).getSubtasks().add(subtask);
+        epics.get(subtask.getEpicId()).checkStatus();
     }
 
-    protected void addFromFile(Task task) {
+    protected void addInternal(Task task) {
         if (task.getId() > this.id) {
             this.id = task.getId();
         }
