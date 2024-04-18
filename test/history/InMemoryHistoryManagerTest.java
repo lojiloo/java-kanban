@@ -51,9 +51,10 @@ class InMemoryHistoryManagerTest {
         assertEquals(0, testFileBackedTaskManager.getHistory().size(),
                 "история просмотров не удалила Task после того, как он был удалён из менеджера (clearListOfTasks)");
 
-        testFileBackedTaskManager.addNewTask(testTask1);
-        testFileBackedTaskManager.getTaskById(testTask1.getId());
-        testFileBackedTaskManager.clearTasksById(testTask1.getId());
+        Task testTask2 = new Task("a", "a");
+        testFileBackedTaskManager.addNewTask(testTask2);
+        testFileBackedTaskManager.getTaskById(testTask2.getId());
+        testFileBackedTaskManager.clearTasksById(testTask2.getId());
 
         assertEquals(0, testFileBackedTaskManager.getHistory().size(),
                 "история просмотров не удалила Task после того, как он был удалён из менеджера (clearTasksById)");
@@ -82,9 +83,10 @@ class InMemoryHistoryManagerTest {
         assertEquals(0, testFileBackedTaskManager.getHistory().size(),
                 "история просмотров не удалила Epic после того, как он был удалён из менеджера (clearListOfEpics)");
 
-        testFileBackedTaskManager.addNewEpic(testEpic);
-        testFileBackedTaskManager.getEpicById(testEpic.getId());
-        testFileBackedTaskManager.clearEpicsById(testEpic.getId());
+        Epic testEpic2 = new Epic("a", "b");
+        testFileBackedTaskManager.addNewEpic(testEpic2);
+        testFileBackedTaskManager.getEpicById(testEpic2.getId());
+        testFileBackedTaskManager.clearEpicsById(testEpic2.getId());
 
         assertEquals(0, testFileBackedTaskManager.getHistory().size(),
                 "история просмотров не удалила Epic после того, как он был удалён из менеджера (clearEpicsById)");
@@ -119,15 +121,17 @@ class InMemoryHistoryManagerTest {
         assertEquals(0, testFileBackedTaskManager.getHistory().size(),
                 "история просмотров не удалила Subtask после того, как он был удалён из менеджера (clearSubtasksById)");
 
-        testFileBackedTaskManager.addNewSubtask(testSub);
-        testFileBackedTaskManager.getSubtaskById(testSub.getId());
+        Subtask testSub2 = new Subtask("a", "b", testEpic.getId());
+        testFileBackedTaskManager.addNewSubtask(testSub2);
+        testFileBackedTaskManager.getSubtaskById(testSub2.getId());
         testFileBackedTaskManager.clearListOfSubtasks();
 
         assertEquals(0, testFileBackedTaskManager.getHistory().size(),
                 "история просмотров не удалила Subtask после того, как он был удалён из менеджера (clearListOfSubtasks)");
 
-        testFileBackedTaskManager.addNewSubtask(testSub);
-        testFileBackedTaskManager.getSubtaskById(testSub.getId());
+        Subtask testSub3 = new Subtask("a", "b", testEpic.getId());
+        testFileBackedTaskManager.addNewSubtask(testSub3);
+        testFileBackedTaskManager.getSubtaskById(testSub3.getId());
         testFileBackedTaskManager.clearListOfEpics();
 
         assertEquals(0, testFileBackedTaskManager.getHistory().size(),
