@@ -1,24 +1,38 @@
 package tasks;
 
-import managers.Managers;
+import managers.FileBackedTaskManager;
 import managers.TaskManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.io.File;
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class EpicTest {
+    private File tempFile;
+    private TaskManager testFileBackedTaskManager;
 
-    static private TaskManager testManager = Managers.getDefault();
+    @BeforeEach
+    void createTempFile() {
+        try {
+            tempFile = File.createTempFile("tempFile", "txt");
+            testFileBackedTaskManager = new FileBackedTaskManager(tempFile.getAbsolutePath());
+        } catch (IOException e) {
+            e.getStackTrace();
+        }
+    }
 
     //если айди эпиков совпадают, то и эпики совпадают
     @Test
     void epicShouldBeEqualWithTheSameID() {
 
         Epic testEpic = new Epic("a", "b");
-        testManager.addNewEpic(testEpic);
+        testFileBackedTaskManager.addNewEpic(testEpic);
         int testId = testEpic.getId();
-        Epic equalEpic = testManager.getEpicById(testId);
+        Epic equalEpic = testFileBackedTaskManager.getEpicById(testId);
 
         assertEquals(testEpic, equalEpic, "тест не пройден: эпики с одинаковым айди не равны");
     }
@@ -28,17 +42,17 @@ class EpicTest {
     void epicShouldChangeStatusWhenAtLeastOneItsSubtaskChangesIt() {
 
         Epic testEpic = new Epic("a", "b");
-        testManager.addNewEpic(testEpic);
+        testFileBackedTaskManager.addNewEpic(testEpic);
 
         Subtask testSubNew = new Subtask("a", "b", testEpic.getId());
         Subtask testSubInProgress = new Subtask("c", "d", testEpic.getId());
-        testManager.addNewSubtask(testSubNew);
-        testManager.addNewSubtask(testSubInProgress);
+        testFileBackedTaskManager.addNewSubtask(testSubNew);
+        testFileBackedTaskManager.addNewSubtask(testSubInProgress);
 
         assertEquals(Status.NEW, testEpic.getStatus(), "новый эпик имеет статус, отличный от NEW");
 
         testSubInProgress.setStatus(Status.IN_PROGRESS);
-        testManager.updateSubtask(testSubInProgress);
+        testFileBackedTaskManager.updateSubtask(testSubInProgress);
 
         assertEquals(Status.IN_PROGRESS, testEpic.getStatus(),
                 "эпик не изменил статус NEW после обновления сабтаска");
@@ -49,17 +63,17 @@ class EpicTest {
     void shouldBeDoneWhenAllSubtasksAreDone() {
 
         Epic testEpic = new Epic("a", "b");
-        testManager.addNewEpic(testEpic);
+        testFileBackedTaskManager.addNewEpic(testEpic);
 
         Subtask testSubDoneOne = new Subtask("a", "b", testEpic.getId());
         Subtask testSubDoneTwo = new Subtask("c", "d", testEpic.getId());
-        testManager.addNewSubtask(testSubDoneOne);
-        testManager.addNewSubtask(testSubDoneTwo);
+        testFileBackedTaskManager.addNewSubtask(testSubDoneOne);
+        testFileBackedTaskManager.addNewSubtask(testSubDoneTwo);
 
         testSubDoneOne.setStatus(Status.DONE);
-        testManager.updateSubtask(testSubDoneOne);
+        testFileBackedTaskManager.updateSubtask(testSubDoneOne);
         testSubDoneTwo.setStatus(Status.DONE);
-        testManager.updateSubtask(testSubDoneTwo);
+        testFileBackedTaskManager.updateSubtask(testSubDoneTwo);
 
         assertEquals(Status.DONE, testEpic.getStatus(), "эпик не завершён после завершения всех сабтасков");
     }
@@ -68,22 +82,22 @@ class EpicTest {
     @Test
     void listOfSubtasksShouldBeEmptyWhenEpicIsDeleted() {
 
-        testManager.clearListOfEpics();
+        testFileBackedTaskManager.clearListOfEpics();
 
-        assertEquals(0, testManager.getListOfSubtasks().size(),
+        assertEquals(0, testFileBackedTaskManager.getListOfSubtasks().size(),
                 "после удаления всех эпиков в менеджере остались сабтаски");
 
         Epic testEpic = new Epic("a", "b");
-        testManager.addNewEpic(testEpic);
+        testFileBackedTaskManager.addNewEpic(testEpic);
         Subtask testSub = new Subtask("a", "b", testEpic.getId());
-        testManager.addNewSubtask(testSub);
+        testFileBackedTaskManager.addNewSubtask(testSub);
 
-        assertEquals(1, testManager.getSubtasksByEpic(testEpic).size(),
+        assertEquals(1, testFileBackedTaskManager.getSubtasksByEpic(testEpic).size(),
                 "сабтаск не был сохранён в список сабтасков для данного эпика");
 
-        testManager.clearEpicsById(testEpic.getId());
+        testFileBackedTaskManager.clearEpicsById(testEpic.getId());
 
-        assertNull(testManager.getSubtaskById(testSub.getId()),
+        assertNull(testFileBackedTaskManager.getSubtaskById(testSub.getId()),
                 "после удаления эпика не были удалены его сабтаски");
     }
 

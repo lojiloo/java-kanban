@@ -18,27 +18,53 @@ public class InMemoryTaskManager implements TaskManager {
     protected HistoryManager history = Managers.getDefaultHistory();
 
     @Override
-    public void addNewTask(Task task) {
+    public void addNewTask(Task task) throws IllegalArgumentException {
+        if (task.getId() != 0) {
+            throw new IllegalArgumentException("id не может быть установлен вручную");
+        }
         int id = getId();
         task.setId(id);
         tasks.put(id, task);
     }
 
     @Override
-    public void addNewEpic(Epic epic) {
+    public void addNewEpic(Epic epic) throws IllegalArgumentException {
+        if (epic.getId() != 0) {
+            throw new IllegalArgumentException("id не может быть установлен вручную");
+        }
         int id = getId();
         epic.setId(id);
         epics.put(id, epic);
     }
 
     @Override
-    public void addNewSubtask(Subtask subtask) {
+    public void addNewSubtask(Subtask subtask) throws IllegalArgumentException {
+        if (subtask.getId() != 0) {
+            throw new IllegalArgumentException("id не может быть установлен вручную");
+        }
         int id = getId();
         subtask.setId(id);
-        subtasks.put(id, subtask);
 
+        subtasks.put(id, subtask);
         epics.get(subtask.getEpicId()).getSubtasks().add(subtask);
         epics.get(subtask.getEpicId()).checkStatus();
+    }
+
+    protected void addInternal(Task task) {
+        if (task.getId() > this.id) {
+            this.id = task.getId();
+        }
+
+        switch (task.getType()) {
+            case TASK:
+                tasks.put(task.getId(), task);
+                break;
+            case EPIC:
+                epics.put(task.getId(), (Epic) task);
+                break;
+            case SUBTASK:
+                subtasks.put(task.getId(), (Subtask) task);
+        }
     }
 
     protected int getId() {
@@ -47,16 +73,22 @@ public class InMemoryTaskManager implements TaskManager {
 
     public void setId(Task task, int id) {
 
-        if (id <= this.id) {
-            if (getEpicById(id) != null) {
-                getEpicById(id).setId(++this.id);
-            } else if (getTaskById(id) != null) {
-                getTaskById(id).setId(++this.id);
-            } else if (getSubtaskById(id) != null) {
-                getSubtaskById(id).setId(++this.id);
+        if (id != this.id) {
+            if (id > this.id) {
+                this.id = id;
             }
         }
 
+        if (tasks.get(id) != null) {
+            setId(tasks.get(id), id + 1);
+            tasks.put(id + 1, tasks.get(id));
+        } else if (epics.get(id) != null) {
+            setId(epics.get(id), id + 1);
+            epics.put(id + 1, epics.get(id));
+        } else if (subtasks.get(id) != null) {
+            setId(subtasks.get(id), id + 1);
+            subtasks.put(id + 1, subtasks.get(id));
+        }
         task.setId(id);
     }
 

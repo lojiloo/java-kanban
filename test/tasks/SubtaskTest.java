@@ -1,26 +1,40 @@
 package tasks;
 
-import managers.Managers;
+import managers.FileBackedTaskManager;
 import managers.TaskManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.io.File;
+import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SubtaskTest {
+    private File tempFile;
+    private TaskManager testFileBackedTaskManager;
 
-    static private TaskManager testManager = Managers.getDefault();
+    @BeforeEach
+    void createTempFile() {
+        try {
+            tempFile = File.createTempFile("tempFile", "txt");
+            testFileBackedTaskManager = new FileBackedTaskManager(tempFile.getAbsolutePath());
+        } catch (IOException e) {
+            e.getStackTrace();
+        }
+    }
 
     //сабтаск всегда знает, к какому эпику он относится
     @Test
     void subtaskHasAccurateInfoAboutItsEpicId() {
         Epic testEpic = new Epic("a", "b");
-        testManager.addNewEpic(testEpic);
+        testFileBackedTaskManager.addNewEpic(testEpic);
         Subtask testSub = new Subtask("c", "d", 1);
-        testManager.addNewSubtask(testSub);
+        testFileBackedTaskManager.addNewSubtask(testSub);
 
         assertEquals(testEpic.getId(), testSub.getEpicId(),
                 "айди эпика не совпадает с тем, что указано в сабтаске");
-        assertEquals(testManager.getEpicById(testEpic.getId()), testManager.getEpicById(testSub.getEpicId()),
+        assertEquals(testFileBackedTaskManager.getEpicById(testEpic.getId()), testFileBackedTaskManager.getEpicById(testSub.getEpicId()),
                 "сабтаск не указывает на свой эпик");
     }
 
