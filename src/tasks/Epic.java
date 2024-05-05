@@ -2,12 +2,16 @@ package tasks;
 
 import managers.TaskType;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 public class Epic extends Task {
-    //protected TaskType type = TaskType.EPIC;
     private final List<Subtask> subtasks = new ArrayList<>();
+    protected LocalDateTime endTime;
 
     public Epic(String name, String description) {
         super(name, description);
@@ -47,8 +51,52 @@ public class Epic extends Task {
         }
     }
 
+    public void checkTemporal() {
+
+        List<Subtask> temporalSubtasks = new ArrayList<>();
+        for (Subtask sub : subtasks) {
+            if (sub.getStartTime().isPresent()) temporalSubtasks.add(sub);
+        }
+
+        if (!temporalSubtasks.isEmpty()) {
+            Optional<LocalDateTime> startTime = temporalSubtasks.stream()
+                    .map(subtask -> subtask.startTime)
+                    .min(Comparator.naturalOrder());
+
+            Long durationOfMinutes = temporalSubtasks.stream()
+                    .map(subtask -> subtask.duration)
+                    .map(Duration::toMinutes)
+                    .reduce(0L, Long::sum);
+
+            this.duration = Duration.ofMinutes(durationOfMinutes);
+
+            if (startTime.isPresent()) {
+                this.startTime = startTime.get();
+                this.endTime = startTime.get().plus(duration);
+            }
+        }
+    }
+
+    @Override
+    public void setTemporal(LocalDateTime startTime, Duration duration) {
+        this.startTime = startTime;
+        this.duration = duration;
+        this.endTime = startTime.plus(duration);
+    }
+
+    @Override
+    public Optional<LocalDateTime> getEndTime() {
+        return Optional.ofNullable(endTime);
+    }
+
     @Override
     public String toString() {
-        return id + ",EPIC," + name + "," + status + "," + description + ",\n";
+        return id
+                + ",EPIC,"
+                + name + ","
+                + status + ","
+                + description + ","
+                + startTime + ","
+                + duration + ",\n";
     }
 }

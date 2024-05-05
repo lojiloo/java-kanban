@@ -20,7 +20,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-    public void linkLast(Task task) {
+    private void linkLast(Task task) {
 
         final Node oldTail = tail;
         final Node newNode = new Node(task, null, oldTail);
@@ -47,7 +47,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-    public void removeNode(Node node) {
+    private void removeNode(Node node) {
 
         if (mapping.size() == 1) {
             head = null;
