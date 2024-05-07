@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Epic extends Task {
     private final List<Subtask> subtasks = new ArrayList<>();
@@ -52,16 +53,21 @@ public class Epic extends Task {
     }
 
     public void checkTemporal() {
-
-        List<Subtask> temporalSubtasks = new ArrayList<>();
-        for (Subtask sub : subtasks) {
-            if (sub.getStartTime().isPresent()) temporalSubtasks.add(sub);
-        }
+        List<Subtask> temporalSubtasks = subtasks.stream()
+                .filter(subtask -> subtask.getStartTime().isPresent())
+                .collect(Collectors.toList());
 
         if (!temporalSubtasks.isEmpty()) {
             Optional<LocalDateTime> startTime = temporalSubtasks.stream()
                     .map(subtask -> subtask.startTime)
                     .min(Comparator.naturalOrder());
+
+            Optional<LocalDateTime> endTime = temporalSubtasks.stream()
+                    .map(subtask -> subtask.getEndTime())
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .max(Comparator.naturalOrder());
+
 
             Long durationOfMinutes = temporalSubtasks.stream()
                     .map(subtask -> subtask.duration)
@@ -70,9 +76,9 @@ public class Epic extends Task {
 
             this.duration = Duration.ofMinutes(durationOfMinutes);
 
-            if (startTime.isPresent()) {
+            if (startTime.isPresent() && endTime.isPresent()) {
                 this.startTime = startTime.get();
-                this.endTime = startTime.get().plus(duration);
+                this.endTime = endTime.get();
             }
         }
     }

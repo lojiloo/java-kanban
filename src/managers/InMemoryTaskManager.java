@@ -5,7 +5,6 @@ import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
 
-import java.time.DateTimeException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -16,7 +15,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected Map<Integer, Task> tasks = new HashMap<>();
     protected Map<Integer, Epic> epics = new HashMap<>();
     protected Map<Integer, Subtask> subtasks = new HashMap<>();
-    protected TreeSet<Task> prioritizedTasks = new TreeSet<>();
+    protected TreeSet<Task> prioritizedTasks = new TreeSet<>(Comparator.comparing(task -> task.getStartTime().get()));
     protected HistoryManager history = Managers.getDefaultHistory();
 
     @Override
@@ -62,7 +61,7 @@ public class InMemoryTaskManager implements TaskManager {
                 tasks.put(task.getId(), task);
 
                 if (task.getEndTime().isPresent()) {
-                    updatePrioritizedTasks();
+                    updatePrioritizedTasks(task);
                 }
                 break;
             case EPIC:
@@ -75,62 +74,44 @@ public class InMemoryTaskManager implements TaskManager {
                 epics.get(((Subtask) task).getEpicId()).checkTemporal();
 
                 if (task.getEndTime().isPresent()) {
-                    updatePrioritizedTasks();
+                    updatePrioritizedTasks(task);
                 }
         }
     }
 
+    @Override
     public void setTemporal(Task task,
                             int year, int month, int day, int hour, int min,
-                            int durationMin) throws TemporalException {
+                            int durationMin) {
 
-        try {
-            if (task.getType().equals(TaskType.EPIC)) {
-                throw new IllegalArgumentException();
-            }
+        if (task.getType() == TaskType.EPIC) {
+            throw new TemporalException("Время и продолжительность эпика рассчитываются автоматически");
+        }
 
-            LocalDateTime startTime = LocalDateTime.of(year, month, day, hour, min);
-            Duration duration = Duration.ofMinutes(durationMin);
+        LocalDateTime startTime = LocalDateTime.of(year, month, day, hour, min);
+        Duration duration = Duration.ofMinutes(durationMin);
 
-            task.setTemporal(startTime, duration);
+        task.setTemporal(startTime, duration);
 
-            if (task.getType().equals(TaskType.SUBTASK)) {
-                Subtask sub = (Subtask) task;
-                epics.get(sub.getEpicId()).checkTemporal();
-            }
+        if (task.getType() == TaskType.SUBTASK) {
+            Subtask sub = (Subtask) task;
+            epics.get(sub.getEpicId()).checkTemporal();
+        }
 
-            if (!isOverlapped(task)) {
-                updatePrioritizedTasks();
-            } else {
-                throw new DateTimeException("Данный слот времени уже занят");
-            }
-
-        } catch (IllegalArgumentException e) {
-            throw new TemporalException("Время и продолжительность эпика рассчитываются автоматически", e);
-        } catch (DateTimeException e) {
-            throw new TemporalException(e.getMessage(), e);
+        if (!isOverlapped(task)) {
+            updatePrioritizedTasks(task);
+        } else {
+            throw new TemporalException("Данный слот времени уже занят");
         }
     }
 
-    private void updatePrioritizedTasks() {
-
-        List<Task> temporalTasks = new ArrayList<>();
-        for (Task task : tasks.values()) {
-            if (task.getStartTime().isPresent()) temporalTasks.add(task);
-        }
-        for (Subtask sub : subtasks.values()) {
-            if (sub.getStartTime().isPresent()) temporalTasks.add(sub);
-        }
-        //не рассматриваю эпики, потому что они состоят из сабтасков
-
-        TreeSet<Task> prioritizedTasks = new TreeSet<>(Comparator.comparing(task -> task.getStartTime().get()));
-        prioritizedTasks.addAll(temporalTasks);
-
-        this.prioritizedTasks = prioritizedTasks;
+    private void updatePrioritizedTasks(Task task) {
+        prioritizedTasks.add(task);
     }
 
-    public TreeSet<Task> getPrioritizedTasks() {
-        return prioritizedTasks;
+    @Override
+    public LinkedList<Task> getPrioritizedTasks() {
+        return new LinkedList<>(prioritizedTasks);
     }
 
     protected boolean isOverlapped(Task newTask) {

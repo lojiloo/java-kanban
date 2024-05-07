@@ -38,6 +38,10 @@ public class Task {
         return Optional.ofNullable(startTime);
     }
 
+    public Optional<Duration> getDuration() {
+        return Optional.ofNullable(duration);
+    }
+
     public int getId() {
         return id;
     }

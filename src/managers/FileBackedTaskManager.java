@@ -16,7 +16,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final String path;
@@ -25,7 +24,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.path = path;
     }
 
-    public static FileBackedTaskManager loadFromFile(File file) throws ManagerSaveException {
+    public static FileBackedTaskManager loadFromFile(File file) {
         FileBackedTaskManager manager = new FileBackedTaskManager(file.getAbsolutePath());
 
         try {
@@ -206,11 +205,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                             int durationMin) throws TemporalException {
         super.setTemporal(task, year, month, day, hour, min, durationMin);
         save();
-    }
-
-    @Override
-    public TreeSet<Task> getPrioritizedTasks() {
-        return super.getPrioritizedTasks();
     }
 
     @Override
