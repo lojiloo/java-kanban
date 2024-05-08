@@ -23,6 +23,10 @@ public class Epic extends Task {
         return subtasks;
     }
 
+    public void clearSubtasks() {
+        subtasks.clear();
+    }
+
     public void checkStatus() {
         if (!subtasks.isEmpty()) {
             int counterNew = 0;
@@ -80,14 +84,16 @@ public class Epic extends Task {
                 this.startTime = startTime.get();
                 this.endTime = endTime.get();
             }
+        } else if (getStartTime().isPresent()) {
+            this.startTime = null;
+            this.endTime = null;
+            this.duration = null;
         }
     }
 
     @Override
     public void setTemporal(LocalDateTime startTime, Duration duration) {
-        this.startTime = startTime;
-        this.duration = duration;
-        this.endTime = startTime.plus(duration);
+        checkTemporal();
     }
 
     @Override
