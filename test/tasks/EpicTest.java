@@ -37,6 +37,21 @@ class EpicTest {
         assertEquals(testEpic, equalEpic, "тест не пройден: эпики с одинаковым айди не равны");
     }
 
+    //если у всех сабтасков статус NEW, то и у эпика статус NEW
+    @Test
+    void epicShouldBeNewWhenAllItsSubtasksAreNew() {
+        Epic testEpic = new Epic("a", "b");
+        testFileBackedTaskManager.addNewEpic(testEpic);
+
+        Subtask testSubNew1 = new Subtask("a", "b", testEpic.getId());
+        Subtask testSubNew2 = new Subtask("c", "d", testEpic.getId());
+        testFileBackedTaskManager.addNewSubtask(testSubNew1);
+        testFileBackedTaskManager.addNewSubtask(testSubNew2);
+
+        assertEquals(Status.NEW, testSubNew1.getStatus(), "новый сабтаск имеет статус, отличный от NEW");
+        assertEquals(Status.NEW, testEpic.getStatus(), "эпик имеет статус, отличный от NEW, когда все сабтаски NEW");
+    }
+
     //если хотя бы у одного сабтаска статус не NEW, то эпик также не может быть NEW
     @Test
     void epicShouldChangeStatusWhenAtLeastOneItsSubtaskChangesIt() {
@@ -58,9 +73,29 @@ class EpicTest {
                 "эпик не изменил статус NEW после обновления сабтаска");
     }
 
+    //если все сабы имеют статус IN_PROGRESS, то и у эпика статус IN_PROGRESS
+    @Test
+    void epicShouldBeInProgressWhenAllItsSubtasksAreInProgress() {
+        Epic testEpic = new Epic("a", "b");
+        testFileBackedTaskManager.addNewEpic(testEpic);
+
+        Subtask testSubNew1 = new Subtask("a", "b", testEpic.getId());
+        Subtask testSubNew2 = new Subtask("c", "d", testEpic.getId());
+        testFileBackedTaskManager.addNewSubtask(testSubNew1);
+        testFileBackedTaskManager.addNewSubtask(testSubNew2);
+
+        testSubNew1.setStatus(Status.IN_PROGRESS);
+        testFileBackedTaskManager.updateSubtask(testSubNew1);
+        testSubNew2.setStatus(Status.IN_PROGRESS);
+        testFileBackedTaskManager.updateSubtask(testSubNew2);
+
+        assertEquals(Status.IN_PROGRESS, testEpic.getStatus(),
+                "эпик имеет статус, отличный от IN_PROGRESS, когда все сабтаски IN_PROGRESS");
+    }
+
     //если все сабы имеют статус DONE, то и у эпика статус DONE
     @Test
-    void shouldBeDoneWhenAllSubtasksAreDone() {
+    void epicShouldBeDoneWhenAllItsSubtasksAreDone() {
 
         Epic testEpic = new Epic("a", "b");
         testFileBackedTaskManager.addNewEpic(testEpic);

@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ManagersTest {
     private File tempFile;
-    private TaskManager testFileBackedTaskManager;
+    private FileBackedTaskManager testFileBackedTaskManager;
 
     @BeforeEach
     void createTempFile() {
@@ -99,4 +99,71 @@ class ManagersTest {
                 "таск изменил значение переменной status после добавления в менеджер");
     }
 
+    //исключение IllegalArgumentException в методах add... корректно выбрасывается
+    @Test
+    void itIsProhibitedToSetIdManuallyForTask () {
+        Task task = new Task("name", "description");
+        task.setId(10);
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> {
+            testFileBackedTaskManager.addNewTask(task);
+        }, "метод addNewTask не выбрасывает исключение IllegalArgumentException");
+
+        String expectedMessage = "id не может быть установлен вручную";
+        String actualMessage = e.getMessage();
+
+        assertEquals(expectedMessage, actualMessage,
+                "Перехваченное исключение содержит неожиданное сообщение");
+    }
+
+    @Test
+    void itIsProhibitedToSetIdManuallyForEpics () {
+        Epic epic = new Epic("name", "description");
+        epic.setId(10);
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> {
+            testFileBackedTaskManager.addNewEpic(epic);
+        }, "метод addNewEpic не выбрасывает исключение IllegalArgumentException");
+
+        String expectedMessage = "id не может быть установлен вручную";
+        String actualMessage = e.getMessage();
+
+        assertEquals(expectedMessage, actualMessage,
+                "Перехваченное исключение содержит неожиданное сообщение");
+    }
+
+    @Test
+    void itIsProhibitedToSetIdManuallyForSubtasks () {
+        Epic epic = new Epic("name", "description");
+        testFileBackedTaskManager.addNewEpic(epic);
+        Subtask sub = new Subtask("name", "description", epic.getId());
+        sub.setId(20);
+
+
+        Exception e = assertThrows(IllegalArgumentException.class, () -> {
+            testFileBackedTaskManager.addNewSubtask(sub);
+        }, "метод addNewSubtask не выбрасывает исключение IllegalArgumentException");
+
+        String expectedMessage = "id не может быть установлен вручную";
+        String actualMessage = e.getMessage();
+
+        assertEquals(expectedMessage, actualMessage,
+                "Перехваченное исключение содержит неожиданное сообщение");
+    }
+
+    //исключение TemporalException в методe setTemporal корректно выбрасывается
+    @Test
+    void temporalExceptionInSetTemporalMethodTest() {
+        Epic epic = new Epic("name", "description");
+
+        Exception e = assertThrows(TemporalException.class, () -> {
+            testFileBackedTaskManager.setTemporal(epic, 2024, 1, 1, 20, 0, 60);
+        }, "метод setTemporal не выбрасывает исключение temporalException");
+
+        String expectedMessage = "Время и продолжительность эпика рассчитываются автоматически";
+        String actualMessage = e.getMessage();
+
+        assertEquals(expectedMessage, actualMessage,
+                "Перехваченное исключение содержит неожиданное сообщение");
+    }
 }

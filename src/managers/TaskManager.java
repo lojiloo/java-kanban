@@ -4,6 +4,7 @@ import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public interface TaskManager {
@@ -13,6 +14,12 @@ public interface TaskManager {
     void addNewEpic(Epic epic);
 
     void addNewSubtask(Subtask subtask);
+
+    void setTemporal(Task task,
+                     int year, int month, int day, int hour, int min,
+                     int durationMin);
+
+    LinkedList<Task> getPrioritizedTasks();
 
     void setId(Task task, int id);
 

@@ -10,11 +10,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class FileBackedManagerTest {
     private static File tempFile;
@@ -120,5 +121,20 @@ class FileBackedManagerTest {
             assertEquals(s, loadedManager.getSubtaskById(s.getId()),
                     "сабтаски не совпадают");
         }
+    }
+
+    //исключение ManagerSaveException в методе loadFromFile корректно перехватывается
+    @Test
+    void managerSaveExceptionInLoadFromFileMethodTest() {
+
+        Exception e = assertThrows(ManagerSaveException.class, () -> {
+            TaskManager test = FileBackedTaskManager.loadFromFile(Paths.get("this_file_does_not_exist.txt").toFile());
+        }, "метод loadFromFile не выбрасывает исключение managerSaveException");
+
+        String expectedMessage = "Ошибка менеджера: ошибка при сохранении в файл";
+        String actualMessage = e.getMessage();
+
+        assertEquals(expectedMessage, actualMessage,
+                "Перехваченное исключение содержит неожиданное сообщение");
     }
 }

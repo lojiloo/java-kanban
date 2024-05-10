@@ -12,6 +12,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,7 +104,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return idList;
     }
 
-    public void save() throws ManagerSaveException {
+    private void save() throws ManagerSaveException {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(path))) {
 
             //собираю задачи в файл
@@ -111,7 +113,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             currentTasks.addAll(getListOfSubtasks());
 
             StringBuilder builder = new StringBuilder();
-            bufferedWriter.write("id,type,name,status,description,epic\n");
+            bufferedWriter.write("id,type,name,status,description,startTime, duration,epic\n");
             for (Task task : currentTasks) {
                 builder.append(task.toString());
             }
@@ -137,12 +139,23 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         Status status = Status.valueOf(taskFields[3]);
         String description = taskFields[4];
 
+        LocalDateTime startTime = null;
+        Duration duration = null;
+        if (!taskFields[5].equals("null") && !taskFields[6].equals("null")) {
+            startTime = LocalDateTime.parse(taskFields[5]);
+            duration = Duration.parse(taskFields[6]);
+        }
+
         switch (type) {
             case SUBTASK:
-                int epicId = Integer.parseInt(taskFields[5]);
+                int epicId = Integer.parseInt(taskFields[7]);
                 Subtask subtask = new Subtask(name, description, epicId);
                 subtask.setId(id);
                 subtask.setStatus(status);
+
+                if (startTime != null && duration != null) {
+                    subtask.setTemporal(startTime, duration);
+                }
 
                 return subtask;
             case EPIC:
@@ -150,11 +163,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 epic.setId(id);
                 epic.setStatus(status);
 
+                if (startTime != null && duration != null) {
+                    epic.setTemporal(startTime, duration);
+                }
+
                 return epic;
             default:
                 Task task = new Task(name, description);
                 task.setId(id);
                 task.setStatus(status);
+
+                if (startTime != null && duration != null) {
+                    task.setTemporal(startTime, duration);
+                }
 
                 return task;
         }
@@ -175,6 +196,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     @Override
     public void addNewSubtask(Subtask subtask) {
         super.addNewSubtask(subtask);
+        save();
+    }
+
+    @Override
+    public void setTemporal(Task task,
+                            int year, int month, int day, int hour, int min,
+                            int durationMin) throws TemporalException {
+        super.setTemporal(task, year, month, day, hour, min, durationMin);
         save();
     }
 
