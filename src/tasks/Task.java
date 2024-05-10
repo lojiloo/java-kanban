@@ -22,6 +22,13 @@ public class Task {
         this.description = description;
     }
 
+    public Task(Task another) {
+        this.id = another.id;
+        this.name = another.name;
+        this.description = another.description;
+        this.status = another.status;
+    }
+
     public void setTemporal(LocalDateTime startTime, Duration duration) {
         this.startTime = startTime;
         this.duration = duration;

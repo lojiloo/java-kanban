@@ -91,18 +91,39 @@ public class InMemoryTaskManager implements TaskManager {
         LocalDateTime startTime = LocalDateTime.of(year, month, day, hour, min);
         Duration duration = Duration.ofMinutes(durationMin);
 
-        task.setTemporal(startTime, duration);
+        if (task.getStartTime().isPresent()) {
+            task.setTemporal(startTime, duration);
+            updatePrioritizedTasks(task); //обновляем, поскольку таск уже есть в prioritizedTasks
+        } else {
+            task.setTemporal(startTime, duration);
+            addToPrioritizedTasks(task); //добавляем новый таск
+        }
 
         if (task.getType() == TaskType.SUBTASK) {
             Subtask sub = (Subtask) task;
             epics.get(sub.getEpicId()).checkTemporal();
         }
+    }
 
-        addToPrioritizedTasks(task);
+    public void removeTemporal(Task task) {
+        if (task.getStartTime().isPresent()) {
+            switch (task.getType()) {
+                case TASK:
+                    updateTask(new Task(task));
+                    break;
+                case SUBTASK:
+                    updateSubtask(new Subtask((Subtask) task));
+                    break;
+                case EPIC:
+                    throw new TemporalException("Время и продолжительность эпика рассчитываются автоматически");
+            }
+            removeFromPrioritizedTasks(task);
+        }
     }
 
     private void updatePrioritizedTasks(Task task) {
-        prioritizedTasks.add(task);
+        removeFromPrioritizedTasks(task);
+        addToPrioritizedTasks(task); //чтобы была проверка при повторном добавлении
     }
 
     private void addToPrioritizedTasks(Task task) {
@@ -248,9 +269,10 @@ public class InMemoryTaskManager implements TaskManager {
 
         epics.get(subtask.getEpicId()).getSubtasks().add(subtask);
         epics.get(subtask.getEpicId()).checkStatus();
+        epics.get(subtask.getEpicId()).checkTemporal();
+
         if (subtask.getStartTime().isPresent()) {
             updatePrioritizedTasks(subtask);
-            epics.get(subtask.getEpicId()).checkTemporal();
         }
 
         subtasks.put(subtask.getId(), subtask);
