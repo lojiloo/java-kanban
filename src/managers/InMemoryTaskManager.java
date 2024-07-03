@@ -5,16 +5,17 @@ import tasks.Epic;
 import tasks.Subtask;
 import tasks.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager {
     protected int id = 0;
     protected Map<Integer, Task> tasks = new HashMap<>();
     protected Map<Integer, Epic> epics = new HashMap<>();
     protected Map<Integer, Subtask> subtasks = new HashMap<>();
+    protected TreeSet<Task> prioritizedTasks = new TreeSet<>(Comparator.comparing(task -> task.getStartTime().get()));
     protected HistoryManager history = Managers.getDefaultHistory();
 
     @Override
@@ -58,13 +59,98 @@ public class InMemoryTaskManager implements TaskManager {
         switch (task.getType()) {
             case TASK:
                 tasks.put(task.getId(), task);
+
+                if (task.getEndTime().isPresent()) {
+                    addToPrioritizedTasks(task);
+                }
                 break;
             case EPIC:
                 epics.put(task.getId(), (Epic) task);
                 break;
             case SUBTASK:
                 subtasks.put(task.getId(), (Subtask) task);
+                epics.get(((Subtask) task).getEpicId()).getSubtasks().add((Subtask) task);
+                epics.get(((Subtask) task).getEpicId()).checkStatus();
+                epics.get(((Subtask) task).getEpicId()).checkTemporal();
+
+                if (task.getEndTime().isPresent()) {
+                    addToPrioritizedTasks(task);
+                }
         }
+    }
+
+    @Override
+    public void setTemporal(Task task,
+                            int year, int month, int day, int hour, int min,
+                            int durationMin) {
+
+        if (task.getType() == TaskType.EPIC) {
+            throw new TemporalException("Время и продолжительность эпика рассчитываются автоматически");
+        }
+
+        LocalDateTime startTime = LocalDateTime.of(year, month, day, hour, min);
+        Duration duration = Duration.ofMinutes(durationMin);
+
+        if (task.getStartTime().isPresent()) {
+            task.setTemporal(startTime, duration);
+            updatePrioritizedTasks(task); //обновляем, поскольку таск уже есть в prioritizedTasks
+        } else {
+            task.setTemporal(startTime, duration);
+            addToPrioritizedTasks(task); //добавляем новый таск
+        }
+
+        if (task.getType() == TaskType.SUBTASK) {
+            Subtask sub = (Subtask) task;
+            epics.get(sub.getEpicId()).checkTemporal();
+        }
+    }
+
+    public void removeTemporal(Task task) {
+        if (task.getStartTime().isPresent()) {
+            switch (task.getType()) {
+                case TASK:
+                    updateTask(new Task(task));
+                    break;
+                case SUBTASK:
+                    updateSubtask(new Subtask((Subtask) task));
+                    break;
+                case EPIC:
+                    throw new TemporalException("Время и продолжительность эпика рассчитываются автоматически");
+            }
+            removeFromPrioritizedTasks(task);
+        }
+    }
+
+    private void updatePrioritizedTasks(Task task) {
+        removeFromPrioritizedTasks(task);
+        addToPrioritizedTasks(task); //чтобы была проверка при повторном добавлении
+    }
+
+    private void addToPrioritizedTasks(Task task) {
+        if (!isOverlapped(task)) {
+            prioritizedTasks.add(task);
+        } else {
+            throw new TemporalException("Данный слот времени уже занят");
+        }
+    }
+
+    private void removeFromPrioritizedTasks(Task task) {
+        prioritizedTasks.remove(task);
+    }
+
+    @Override
+    public LinkedList<Task> getPrioritizedTasks() {
+        return new LinkedList<>(prioritizedTasks);
+    }
+
+    private boolean isOverlapped(Task newTask) {
+        if (!prioritizedTasks.isEmpty()) {
+            return prioritizedTasks.stream()
+                    .filter(task -> task.getStartTime().isPresent() && task.getEndTime().isPresent())
+                    .filter(task -> task.getStartTime().get().isBefore(newTask.getEndTime().get()))
+                    .anyMatch(task -> newTask.getStartTime().get().isBefore(task.getEndTime().get()));
+        }
+        return false;
     }
 
     protected int getId() {
@@ -96,10 +182,7 @@ public class InMemoryTaskManager implements TaskManager {
     public List<Task> getListOfTasks() {
         List<Task> listOfTasks = new ArrayList<>();
         if (!tasks.isEmpty()) {
-            for (Integer id : tasks.keySet()) {
-                Task task = tasks.get(id);
-                listOfTasks.add(task);
-            }
+            listOfTasks.addAll(new ArrayList<>(tasks.values()));
         }
         return listOfTasks;
     }
@@ -108,10 +191,7 @@ public class InMemoryTaskManager implements TaskManager {
     public List<Epic> getListOfEpics() {
         List<Epic> listOfEpics = new ArrayList<>();
         if (!epics.isEmpty()) {
-            for (Integer id : epics.keySet()) {
-                Epic epic = epics.get(id);
-                listOfEpics.add(epic);
-            }
+            listOfEpics.addAll(new ArrayList<>(epics.values()));
         }
         return listOfEpics;
     }
@@ -120,48 +200,33 @@ public class InMemoryTaskManager implements TaskManager {
     public List<Subtask> getListOfSubtasks() {
         List<Subtask> listOfSubtasks = new ArrayList<>();
         if (!subtasks.isEmpty()) {
-            for (Integer id : subtasks.keySet()) {
-                Subtask subtask = subtasks.get(id);
-                listOfSubtasks.add(subtask);
-            }
+            listOfSubtasks.addAll(new ArrayList<>(subtasks.values()));
         }
         return listOfSubtasks;
     }
 
     @Override
     public void clearListOfTasks() {
-
-        for (int id : tasks.keySet()) {
-            history.remove(id);
-        }
-
+        tasks.keySet().forEach(id -> history.remove(id));
+        tasks.values().forEach(this::removeFromPrioritizedTasks);
         tasks.clear();
     }
 
     @Override
     public void clearListOfEpics() {
-
-        for (int id : epics.keySet()) {
-            history.remove(id);
-        }
+        epics.keySet().forEach(id -> history.remove(id));
+        clearListOfSubtasks();
         epics.clear();
-
-        for (int id : subtasks.keySet()) {
-            history.remove(id);
-        }
-        subtasks.clear();
     }
 
     @Override
     public void clearListOfSubtasks() {
-        for (Epic epic : epics.values()) {
-            epic.getSubtasks().clear();
-            epic.checkStatus();
-        }
+        epics.values().forEach(Epic::clearSubtasks);
+        epics.values().forEach(Epic::checkStatus);
+        epics.values().forEach(Epic::checkTemporal);
 
-        for (int id : subtasks.keySet()) {
-            history.remove(id);
-        }
+        subtasks.keySet().forEach(id -> history.remove(id));
+        subtasks.values().forEach(this::removeFromPrioritizedTasks);
         subtasks.clear();
     }
 
@@ -185,6 +250,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateTask(Task task) {
+        if (task.getStartTime().isPresent()) {
+            updatePrioritizedTasks(task);
+        }
+
         tasks.put(task.getId(), task);
     }
 
@@ -195,17 +264,26 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateSubtask(Subtask subtask) {
-        Subtask sub = subtasks.get(subtask.getId());
+        Subtask subToRemove = subtasks.get(subtask.getId());
+        epics.get(subToRemove.getEpicId()).getSubtasks().remove(subToRemove);
 
-        epics.get(sub.getEpicId()).getSubtasks().remove(sub);
         epics.get(subtask.getEpicId()).getSubtasks().add(subtask);
         epics.get(subtask.getEpicId()).checkStatus();
+        epics.get(subtask.getEpicId()).checkTemporal();
+
+        if (subtask.getStartTime().isPresent()) {
+            updatePrioritizedTasks(subtask);
+        }
 
         subtasks.put(subtask.getId(), subtask);
     }
 
     @Override
     public void clearTasksById(int id) {
+        if (tasks.get(id).getStartTime().isPresent()) {
+            removeFromPrioritizedTasks(tasks.get(id));
+        }
+
         history.remove(id);
         tasks.remove(id);
     }
@@ -215,17 +293,16 @@ public class InMemoryTaskManager implements TaskManager {
         epics.remove(id);
         history.remove(id);
 
-        ArrayList<Integer> subIdToRemove = new ArrayList<>();
-        for (Subtask sub : subtasks.values()) {
-            if (sub.getEpicId() == id) {
-                subIdToRemove.add(sub.getId());
-            }
-        }
+        List<Integer> subIdToRemove = subtasks.values().stream()
+                .filter(subtask -> subtask.getEpicId() == id)
+                .map(Task::getId)
+                .collect(Collectors.toList());
 
-        for (int subId : subIdToRemove) {
-            subtasks.remove(subId);
-            history.remove(subId);
-        }
+        subIdToRemove.stream()
+                .filter(subId -> subtasks.get(subId).getStartTime().isPresent())
+                .forEach(subId -> removeFromPrioritizedTasks(subtasks.get(subId)));
+        subIdToRemove.forEach(subId -> history.remove(subId));
+        subIdToRemove.forEach(subId -> subtasks.remove(subId));
     }
 
     @Override
@@ -234,10 +311,14 @@ public class InMemoryTaskManager implements TaskManager {
         epics.get(epicId)
                 .getSubtasks()
                 .remove(subtasks.get(id));
-
-        subtasks.remove(id);
-        history.remove(id);
         epics.get(epicId).checkStatus();
+        epics.get(epicId).checkTemporal();
+
+        if (subtasks.get(id).getStartTime().isPresent()) {
+            removeFromPrioritizedTasks(subtasks.get(id));
+        }
+        history.remove(id);
+        subtasks.remove(id);
     }
 
     @Override

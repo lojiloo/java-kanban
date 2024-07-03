@@ -31,11 +31,11 @@ class InMemoryHistoryManagerTest {
     //история умеет добавлять таски
     @Test
     void historyManagerAddsTasksCorrectly() {
-        Task testTask1 = new Task("a", "a");
-        testFileBackedTaskManager.addNewTask(testTask1);
-        testFileBackedTaskManager.getTaskById(testTask1.getId());
+        Task testTask = new Task("a", "a");
+        testFileBackedTaskManager.addNewTask(testTask);
+        testFileBackedTaskManager.getTaskById(testTask.getId());
 
-        assertEquals(testTask1, testFileBackedTaskManager.getHistory().get(0),
+        assertEquals(testTask, testFileBackedTaskManager.getHistory().get(0),
                 "история просмотров не записала обращение к Task");
     }
 
@@ -164,5 +164,71 @@ class InMemoryHistoryManagerTest {
 
         assertEquals(testTask.getId(), testFileBackedTaskManager.getHistory().get(1).getId(),
                 "история просмотров не перезаписала повторное обращение");
+    }
+
+    //история корректно удаляет записи с начала
+    @Test
+    void historyRemovesNodeCorrectlyWhenItIsInTheFirstPlace() {
+        Task test1 = new Task("task name", "task description");
+        Task test2 = new Task("task name", "task description");
+        Task test3 = new Task("task name", "task description");
+
+        testFileBackedTaskManager.addNewTask(test1);
+        testFileBackedTaskManager.addNewTask(test2);
+        testFileBackedTaskManager.addNewTask(test3);
+
+        testFileBackedTaskManager.getTaskById(test1.getId());
+        testFileBackedTaskManager.getTaskById(test2.getId());
+        testFileBackedTaskManager.getTaskById(test3.getId());
+
+        testFileBackedTaskManager.clearTasksById(test1.getId());
+        assertEquals(test2, testFileBackedTaskManager.getHistory().get(0),
+                "после удаления первого элемента предшествующий ему элемент не стал head");
+        assertEquals(test3, testFileBackedTaskManager.getHistory().get(1),
+                "после удаления первого элемента tail изменился");
+    }
+
+    //история корректно удаляет записи с середины
+    @Test
+    void historyRemovesNodeCorrectlyWhenItIsInTheMiddle() {
+        Task test1 = new Task("task name", "task description");
+        Task test2 = new Task("task name", "task description");
+        Task test3 = new Task("task name", "task description");
+
+        testFileBackedTaskManager.addNewTask(test1);
+        testFileBackedTaskManager.addNewTask(test2);
+        testFileBackedTaskManager.addNewTask(test3);
+
+        testFileBackedTaskManager.getTaskById(test1.getId());
+        testFileBackedTaskManager.getTaskById(test2.getId());
+        testFileBackedTaskManager.getTaskById(test3.getId());
+
+        testFileBackedTaskManager.clearTasksById(test2.getId());
+        assertEquals(test1, testFileBackedTaskManager.getHistory().get(0),
+                "после удаления срединного элемента head изменился");
+        assertEquals(test3, testFileBackedTaskManager.getHistory().get(1),
+                "после удаления срединного элемента tail изменился");
+    }
+
+    //история корректно удаляет записи с конца
+    @Test
+    void historyRemovesNodeCorrectlyWhenItIsInTheEnd() {
+        Task test1 = new Task("task name", "task description");
+        Task test2 = new Task("task name", "task description");
+        Task test3 = new Task("task name", "task description");
+
+        testFileBackedTaskManager.addNewTask(test1);
+        testFileBackedTaskManager.addNewTask(test2);
+        testFileBackedTaskManager.addNewTask(test3);
+
+        testFileBackedTaskManager.getTaskById(test1.getId());
+        testFileBackedTaskManager.getTaskById(test2.getId());
+        testFileBackedTaskManager.getTaskById(test3.getId());
+
+        testFileBackedTaskManager.clearTasksById(test3.getId());
+        assertEquals(test1, testFileBackedTaskManager.getHistory().get(0),
+                "после удаления последнего элемента head изменился");
+        assertEquals(test2, testFileBackedTaskManager.getHistory().get(1),
+                "после удаления последнего элемента предшествующий ему элемент не стал tail");
     }
 }
