@@ -1,4 +1,4 @@
-package httpAPI;
+package http;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
