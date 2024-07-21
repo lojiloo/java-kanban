@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Epic extends Task {
-    private transient final List<Subtask> subtasks = new ArrayList<>();
+    private final transient List<Subtask> subtasks = new ArrayList<>();
     protected LocalDateTime endTime;
 
     public Epic(String name, String description) {
