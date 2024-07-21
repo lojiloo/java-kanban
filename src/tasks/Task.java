@@ -8,10 +8,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class Task {
+    protected int id;
     protected String name;
     protected Status status;
     protected String description;
-    protected int id;
     protected TaskType type = TaskType.TASK;
     protected LocalDateTime startTime;
     protected Duration duration;
@@ -93,7 +93,7 @@ public class Task {
                 + status + ","
                 + description + ","
                 + startTime + ","
-                + duration + ",\n";
+                + duration + "\n";
     }
 
     @Override
