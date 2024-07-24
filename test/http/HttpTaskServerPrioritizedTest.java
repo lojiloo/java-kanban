@@ -1,6 +1,5 @@
 package http;
 
-import com.google.gson.Gson;
 import managers.FileBackedTaskManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,12 +12,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import static http.HttpTaskServer.gson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HttpTaskServerPrioritizedTest {
-    HttpTaskServer server = new HttpTaskServer();
-    FileBackedTaskManager manager = server.manager;
-    Gson gson = server.gson;
+    FileBackedTaskManager manager = new FileBackedTaskManager("file.txt");
+    HttpTaskServer server = new HttpTaskServer(manager);
 
     public HttpTaskServerPrioritizedTest() throws IOException {
     }
@@ -47,7 +46,13 @@ public class HttpTaskServerPrioritizedTest {
                 .build();
         client.send(request1, HttpResponse.BodyHandlers.ofString());
 
-        String requestBodyJSON = "{\"startTime\":\"19.07.2024, 10:00\",\"duration\":\"60\"}";
+        String requestBodyJSON = "{\"id\":1," +
+                "\"name\":\"t1\"," +
+                "\"status\":\"NEW\"," +
+                "\"description\":\"test task\"," +
+                "\"type\":\"TASK\"," +
+                "\"startTime\":\"19.07.2024, 10:00\"," +
+                "\"duration\":\"60\"}";
         URI url2 = URI.create("http://localhost:8080/tasks/" + manager.getListOfTasks().get(0).getId());
         HttpRequest request2 = HttpRequest.newBuilder()
                 .uri(url2)
@@ -72,7 +77,13 @@ public class HttpTaskServerPrioritizedTest {
                 .build();
         client.send(request1, HttpResponse.BodyHandlers.ofString());
 
-        String requestBodyJSON1 = "{\"startTime\":\"19.07.2024, 10:00\",\"duration\":\"60\"}";
+        String requestBodyJSON1 = "{\"id\":1," +
+                "\"name\":\"t1\"," +
+                "\"status\":\"NEW\"," +
+                "\"description\":\"test task\"," +
+                "\"type\":\"TASK\"," +
+                "\"startTime\":\"19.07.2024, 10:00\"," +
+                "\"duration\":\"60\"}";
         URI url2 = URI.create("http://localhost:8080/tasks/" + manager.getListOfTasks().get(0).getId());
         HttpRequest request2 = HttpRequest.newBuilder()
                 .uri(url2)
@@ -80,7 +91,7 @@ public class HttpTaskServerPrioritizedTest {
                 .build();
         client.send(request2, HttpResponse.BodyHandlers.ofString());
 
-        Task task2 = new Task("t1", "test task");
+        Task task2 = new Task("t2", "test task");
         String taskJSON2 = gson.toJson(task2);
 
         URI url3 = URI.create("http://localhost:8080/tasks");
@@ -90,7 +101,13 @@ public class HttpTaskServerPrioritizedTest {
                 .build();
         client.send(request3, HttpResponse.BodyHandlers.ofString());
 
-        String requestBodyJSON2 = "{\"startTime\":\"19.07.2024, 11:30\",\"duration\":\"60\"}";
+        String requestBodyJSON2 = "{\"id\":2," +
+                "\"name\":\"t2\"," +
+                "\"status\":\"NEW\"," +
+                "\"description\":\"test task\"," +
+                "\"type\":\"TASK\"," +
+                "\"startTime\":\"19.07.2024, 11:30\"," +
+                "\"duration\":\"60\"}";
         URI url4 = URI.create("http://localhost:8080/tasks/" + manager.getListOfTasks().get(1).getId());
         HttpRequest request4 = HttpRequest.newBuilder()
                 .uri(url4)

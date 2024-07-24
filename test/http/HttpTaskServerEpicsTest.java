@@ -1,6 +1,5 @@
 package http;
 
-import com.google.gson.Gson;
 import managers.FileBackedTaskManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,13 +13,13 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import static http.HttpTaskServer.gson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class HttpTaskServerEpicsTest {
-    HttpTaskServer server = new HttpTaskServer();
-    FileBackedTaskManager manager = server.manager;
-    Gson gson = server.gson;
+    FileBackedTaskManager manager = new FileBackedTaskManager("file.txt");
+    HttpTaskServer server = new HttpTaskServer(manager);
 
     public HttpTaskServerEpicsTest() throws IOException {
     }
@@ -129,7 +128,6 @@ public class HttpTaskServerEpicsTest {
         assertEquals(404, response2.statusCode(),
                 "Сервер не вернул код 404, когда эпик не был найден");
     }
-
 
     @Test
     public void getAllEpicsTest() throws IOException, InterruptedException {

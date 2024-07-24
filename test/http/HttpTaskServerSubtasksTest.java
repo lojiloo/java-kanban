@@ -1,6 +1,5 @@
 package http;
 
-import com.google.gson.Gson;
 import managers.FileBackedTaskManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,13 +14,13 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import static http.HttpTaskServer.gson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class HttpTaskServerSubtasksTest {
-    HttpTaskServer server = new HttpTaskServer();
-    FileBackedTaskManager manager = server.manager;
-    Gson gson = server.gson;
+    FileBackedTaskManager manager = new FileBackedTaskManager("file.txt");
+    HttpTaskServer server = new HttpTaskServer(manager);
 
     public HttpTaskServerSubtasksTest() throws IOException {
     }
@@ -72,7 +71,13 @@ public class HttpTaskServerSubtasksTest {
 
     @Test
     public void updateSubtaskTest() throws IOException, InterruptedException {
-        String requestBodyJSON = "{\"status\":\"" + Status.IN_PROGRESS + "\"}";
+        String requestBodyJSON = "{\"id\":2," + "\"epicId\":\"1\"," +
+                "\"name\":\"s1\"," +
+                "\"status\":\"IN_PROGRESS\"," +
+                "\"description\":\"test subtask\"," +
+                "\"type\":\"SUBTASK\"," +
+                "\"startTime\":null," +
+                "\"duration\":null}";
 
         HttpClient client = HttpClient.newHttpClient();
         URI url = URI.create("http://localhost:8080/subtasks/" + manager.getListOfSubtasks().get(0).getId());
@@ -89,7 +94,13 @@ public class HttpTaskServerSubtasksTest {
 
     @Test
     public void updateSubtaskWithBusyTimeSlotTest() throws IOException, InterruptedException {
-        String requestBodyJSON = "{\"startTime\":\"19.07.2024, 10:00\",\"duration\":\"60\"}";
+        String requestBodyJSON = "{\"id\":2," + "\"epicId\":\"1\"," +
+                "\"name\":\"s1\"," +
+                "\"status\":\"NEW\"," +
+                "\"description\":\"test subtask\"," +
+                "\"type\":\"SUBTASK\"," +
+                "\"startTime\":\"19.07.2024, 10:00\"," +
+                "\"duration\":\"60\"}";
 
         HttpClient client = HttpClient.newHttpClient();
         URI url = URI.create("http://localhost:8080/subtasks/" + manager.getListOfSubtasks().get(0).getId());
@@ -101,7 +112,13 @@ public class HttpTaskServerSubtasksTest {
         assertEquals(200, response.statusCode());
 
         Subtask subtask = new Subtask("s2", "test subtask", manager.getListOfEpics().get(0).getId());
-        String requestBodyJSON2 = "{\"startTime\":\"19.07.2024, 10:30\",\"duration\":\"60\"}";
+        String requestBodyJSON2 = "{\"id\":3," + "\"epicId\":\"1\"," +
+                "\"name\":\"s2\"," +
+                "\"status\":\"NEW\"," +
+                "\"description\":\"test subtask\"," +
+                "\"type\":\"SUBTASK\"," +
+                "\"startTime\":\"19.07.2024, 10:30\"," +
+                "\"duration\":\"60\"}";
         String subtaskJSON = gson.toJson(subtask);
 
         URI url2 = URI.create("http://localhost:8080/subtasks");

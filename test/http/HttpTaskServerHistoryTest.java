@@ -1,6 +1,5 @@
 package http;
 
-import com.google.gson.Gson;
 import managers.FileBackedTaskManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,12 +12,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import static http.HttpTaskServer.gson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HttpTaskServerHistoryTest {
-    HttpTaskServer server = new HttpTaskServer();
-    FileBackedTaskManager manager = server.manager;
-    Gson gson = server.gson;
+    FileBackedTaskManager manager = new FileBackedTaskManager("file.txt");
+    HttpTaskServer server = new HttpTaskServer(manager);
 
     public HttpTaskServerHistoryTest() throws IOException {
     }
