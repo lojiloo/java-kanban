@@ -13,7 +13,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-import static http.HttpTaskServer.gson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -29,7 +28,7 @@ public class HttpTaskServerTasksTest {
         server.start();
 
         Task task = new Task("t1", "test task");
-        String taskJSON = gson.toJson(task);
+        String taskJSON = server.getGson().toJson(task);
 
         HttpClient client = HttpClient.newHttpClient();
         URI url = URI.create("http://localhost:8080/tasks");
@@ -108,7 +107,7 @@ public class HttpTaskServerTasksTest {
                 "\"type\":\"TASK\"," +
                 "\"startTime\":\"19.07.2024, 10:30\"," +
                 "\"duration\":\"60\"}";
-        String taskJSON = gson.toJson(task);
+        String taskJSON = server.getGson().toJson(task);
 
         URI url2 = URI.create("http://localhost:8080/tasks");
         HttpRequest request2 = HttpRequest.newBuilder()
@@ -131,7 +130,7 @@ public class HttpTaskServerTasksTest {
     @Test
     public void getOneTaskTest() throws IOException, InterruptedException {
         Task task = manager.getListOfTasks().get(0);
-        String taskJSON = gson.toJson(task);
+        String taskJSON = server.getGson().toJson(task);
 
         HttpClient client = HttpClient.newHttpClient();
         URI url = URI.create("http://localhost:8080/tasks/" + task.getId());
@@ -172,7 +171,7 @@ public class HttpTaskServerTasksTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, response.statusCode());
 
-        assertEquals(gson.toJson(manager.getListOfTasks().get(0)), response.body(),
+        assertEquals(server.getGson().toJson(manager.getListOfTasks().get(0)), response.body(),
                 "Ответ сервера не совпадает с тем, что содержится в менеджере");
     }
 

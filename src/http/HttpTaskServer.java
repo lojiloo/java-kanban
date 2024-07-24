@@ -8,7 +8,6 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import com.sun.net.httpserver.HttpServer;
 import managers.FileBackedTaskManager;
-import managers.Managers;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -17,33 +16,23 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class HttpTaskServer {
-    static FileBackedTaskManager manager;
-    static Gson gson = new GsonBuilder()
+    private final FileBackedTaskManager manager;
+    private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .registerTypeAdapter(Duration.class, new DurationAdapter())
             .setPrettyPrinting()
             .serializeNulls()
             .create();
-    HttpServer httpTaskServer;
-
-    public HttpTaskServer() throws IOException {
-        manager = Managers.getDefault("file.txt");
-        this.httpTaskServer = HttpServer.create(new InetSocketAddress(8080), 0);
-        httpTaskServer.createContext("/tasks", new TasksHandler());
-        httpTaskServer.createContext("/subtasks", new SubtasksHandler());
-        httpTaskServer.createContext("/epics", new EpicsHandler());
-        httpTaskServer.createContext("/history", new HistoryHandler());
-        httpTaskServer.createContext("/prioritized", new PrioritizedHandler());
-    }
+    private final HttpServer httpTaskServer;
 
     public HttpTaskServer(FileBackedTaskManager manager) throws IOException {
         this.httpTaskServer = HttpServer.create(new InetSocketAddress(8080), 0);
-        HttpTaskServer.manager = manager;
-        httpTaskServer.createContext("/tasks", new TasksHandler());
-        httpTaskServer.createContext("/subtasks", new SubtasksHandler());
-        httpTaskServer.createContext("/epics", new EpicsHandler());
-        httpTaskServer.createContext("/history", new HistoryHandler());
-        httpTaskServer.createContext("/prioritized", new PrioritizedHandler());
+        this.manager = manager;
+        httpTaskServer.createContext("/tasks", new TasksHandler(this.manager, this.gson));
+        httpTaskServer.createContext("/subtasks", new SubtasksHandler(this.manager, this.gson));
+        httpTaskServer.createContext("/epics", new EpicsHandler(this.manager, this.gson));
+        httpTaskServer.createContext("/history", new HistoryHandler(this.manager, this.gson));
+        httpTaskServer.createContext("/prioritized", new PrioritizedHandler(this.manager, this.gson));
     }
 
     public void start() {
@@ -52,6 +41,10 @@ public class HttpTaskServer {
 
     public void stop() {
         httpTaskServer.stop(1);
+    }
+
+    public Gson getGson() {
+        return gson;
     }
 
     private static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {

@@ -14,7 +14,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-import static http.HttpTaskServer.gson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -30,7 +29,7 @@ public class HttpTaskServerSubtasksTest {
         server.start();
 
         Epic epic = new Epic("e1", "test epic");
-        String epicJSON = gson.toJson(epic);
+        String epicJSON = server.getGson().toJson(epic);
 
         HttpClient client = HttpClient.newHttpClient();
         URI url1 = URI.create("http://localhost:8080/epics");
@@ -41,7 +40,7 @@ public class HttpTaskServerSubtasksTest {
         client.send(request1, HttpResponse.BodyHandlers.ofString());
 
         Subtask subtask = new Subtask("s1", "test subtask", manager.getListOfEpics().get(0).getId());
-        String subtaskJSON = gson.toJson(subtask);
+        String subtaskJSON = server.getGson().toJson(subtask);
         URI url2 = URI.create("http://localhost:8080/subtasks");
         HttpRequest request2 = HttpRequest.newBuilder()
                 .uri(url2)
@@ -119,7 +118,7 @@ public class HttpTaskServerSubtasksTest {
                 "\"type\":\"SUBTASK\"," +
                 "\"startTime\":\"19.07.2024, 10:30\"," +
                 "\"duration\":\"60\"}";
-        String subtaskJSON = gson.toJson(subtask);
+        String subtaskJSON = server.getGson().toJson(subtask);
 
         URI url2 = URI.create("http://localhost:8080/subtasks");
         HttpRequest request2 = HttpRequest.newBuilder()
@@ -143,7 +142,7 @@ public class HttpTaskServerSubtasksTest {
     @Test
     public void getOneSubtaskTest() throws IOException, InterruptedException {
         Subtask subtask = manager.getListOfSubtasks().get(0);
-        String subtaskJSON = gson.toJson(subtask);
+        String subtaskJSON = server.getGson().toJson(subtask);
 
         HttpClient client = HttpClient.newHttpClient();
         URI url = URI.create("http://localhost:8080/subtasks/" + subtask.getId());
@@ -184,7 +183,7 @@ public class HttpTaskServerSubtasksTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, response.statusCode());
 
-        assertEquals(gson.toJson(manager.getListOfSubtasks().get(0)), response.body(),
+        assertEquals(server.getGson().toJson(manager.getListOfSubtasks().get(0)), response.body(),
                 "Ответ сервера не совпадает с тем, что содержится в менеджере");
     }
 

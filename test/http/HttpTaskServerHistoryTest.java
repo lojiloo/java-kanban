@@ -12,7 +12,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-import static http.HttpTaskServer.gson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HttpTaskServerHistoryTest {
@@ -27,7 +26,7 @@ public class HttpTaskServerHistoryTest {
         server.start();
 
         Task task = new Task("t1", "test task");
-        String taskJSON = gson.toJson(task);
+        String taskJSON = server.getGson().toJson(task);
 
         HttpClient client = HttpClient.newHttpClient();
         URI url1 = URI.create("http://localhost:8080/tasks");

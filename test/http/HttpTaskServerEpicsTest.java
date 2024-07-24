@@ -13,7 +13,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-import static http.HttpTaskServer.gson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -29,7 +28,7 @@ public class HttpTaskServerEpicsTest {
         server.start();
 
         Epic epic = new Epic("e1", "test epic");
-        String epicJSON = gson.toJson(epic);
+        String epicJSON = server.getGson().toJson(epic);
 
         HttpClient client = HttpClient.newHttpClient();
         URI url1 = URI.create("http://localhost:8080/epics");
@@ -61,7 +60,7 @@ public class HttpTaskServerEpicsTest {
     @Test
     public void getOneEpicTest() throws IOException, InterruptedException {
         Epic epic = manager.getListOfEpics().get(0);
-        String epicJSON = gson.toJson(epic);
+        String epicJSON = server.getGson().toJson(epic);
 
         HttpClient client = HttpClient.newHttpClient();
         URI url = URI.create("http://localhost:8080/epics/" + epic.getId());
@@ -94,7 +93,7 @@ public class HttpTaskServerEpicsTest {
     @Test
     public void getSubtasksByEpicTest() throws IOException, InterruptedException {
         Subtask sub1 = new Subtask("s1", "test subtask", manager.getListOfEpics().get(0).getId());
-        String sub1JSON = gson.toJson(sub1);
+        String sub1JSON = server.getGson().toJson(sub1);
 
         HttpClient client = HttpClient.newHttpClient();
         URI url1 = URI.create("http://localhost:8080/subtasks");
@@ -111,7 +110,7 @@ public class HttpTaskServerEpicsTest {
                 .build();
         HttpResponse<String> response2 = client.send(request2, HttpResponse.BodyHandlers.ofString());
 
-        assertEquals(response2.body(), gson.toJson(manager.getSubtasksByEpic(manager.getListOfEpics().get(0)).get(0)),
+        assertEquals(response2.body(), server.getGson().toJson(manager.getSubtasksByEpic(manager.getListOfEpics().get(0)).get(0)),
                 "Сервер вернул для эпика список подзадач, отличающийся от того, что предоставил менеджер");
     }
 
@@ -140,7 +139,7 @@ public class HttpTaskServerEpicsTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, response.statusCode());
 
-        assertEquals(gson.toJson(manager.getListOfEpics().get(0)), response.body(),
+        assertEquals(server.getGson().toJson(manager.getListOfEpics().get(0)), response.body(),
                 "Ответ сервера не совпадает с тем, что содержится в менеджере");
     }
 

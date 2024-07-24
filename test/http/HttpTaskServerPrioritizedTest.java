@@ -12,7 +12,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-import static http.HttpTaskServer.gson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HttpTaskServerPrioritizedTest {
@@ -36,7 +35,7 @@ public class HttpTaskServerPrioritizedTest {
     @Test
     public void getPrioritizedTasksTest() throws IOException, InterruptedException {
         Task task = new Task("t1", "test task");
-        String taskJSON = gson.toJson(task);
+        String taskJSON = server.getGson().toJson(task);
 
         HttpClient client = HttpClient.newHttpClient();
         URI url1 = URI.create("http://localhost:8080/tasks");
@@ -67,7 +66,7 @@ public class HttpTaskServerPrioritizedTest {
     @Test
     public void prioritizedTasksAreCorrectInTimeline() throws IOException, InterruptedException {
         Task task1 = new Task("t1", "test task");
-        String taskJSON1 = gson.toJson(task1);
+        String taskJSON1 = server.getGson().toJson(task1);
 
         HttpClient client = HttpClient.newHttpClient();
         URI url1 = URI.create("http://localhost:8080/tasks");
@@ -92,7 +91,7 @@ public class HttpTaskServerPrioritizedTest {
         client.send(request2, HttpResponse.BodyHandlers.ofString());
 
         Task task2 = new Task("t2", "test task");
-        String taskJSON2 = gson.toJson(task2);
+        String taskJSON2 = server.getGson().toJson(task2);
 
         URI url3 = URI.create("http://localhost:8080/tasks");
         HttpRequest request3 = HttpRequest.newBuilder()
