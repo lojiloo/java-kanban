@@ -236,16 +236,40 @@ public class InMemoryTaskManager implements TaskManager {
         return tasks.get(id);
     }
 
+    public Task getTaskById(int id, boolean updateHistory) {
+        if (updateHistory) {
+            return getTaskById(id);
+        } else {
+            return tasks.get(id);
+        }
+    }
+
     @Override
     public Epic getEpicById(int id) {
         history.add(epics.get(id));
         return epics.get(id);
     }
 
+    public Epic getEpicById(int id, boolean updateHistory) {
+        if (updateHistory) {
+            return getEpicById(id);
+        } else {
+            return epics.get(id);
+        }
+    }
+
     @Override
     public Subtask getSubtaskById(int id) {
         history.add(subtasks.get(id));
         return subtasks.get(id);
+    }
+
+    public Subtask getSubtaskById(int id, boolean updateHistory) {
+        if (updateHistory) {
+            return getSubtaskById(id);
+        } else {
+            return subtasks.get(id);
+        }
     }
 
     @Override

@@ -101,7 +101,7 @@ class ManagersTest {
 
     //исключение IllegalArgumentException в методах add... корректно выбрасывается
     @Test
-    void itIsProhibitedToSetIdManuallyForTask () {
+    void itIsProhibitedToSetIdManuallyForTask() {
         Task task = new Task("name", "description");
         task.setId(10);
 
@@ -117,7 +117,7 @@ class ManagersTest {
     }
 
     @Test
-    void itIsProhibitedToSetIdManuallyForEpics () {
+    void itIsProhibitedToSetIdManuallyForEpics() {
         Epic epic = new Epic("name", "description");
         epic.setId(10);
 
@@ -133,7 +133,7 @@ class ManagersTest {
     }
 
     @Test
-    void itIsProhibitedToSetIdManuallyForSubtasks () {
+    void itIsProhibitedToSetIdManuallyForSubtasks() {
         Epic epic = new Epic("name", "description");
         testFileBackedTaskManager.addNewEpic(epic);
         Subtask sub = new Subtask("name", "description", epic.getId());
